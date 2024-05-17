@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Great+Vibes&display=swap"
+              rel="stylesheet">
+        <link rel="stylesheet" href="css/styles.css">
+        <link rel="stylesheet"
+              href="https://unicons.iconscout.com/release/v4.0.8/css/line.css">
+        <link
+              rel="stylesheet"
+              href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+        <script
+                src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+        <script defer
+                src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        <title>Цветочная мастерская "Клевер"</title>
+        <link rel="icon" type="image/x-icon" href="/img/favicon.png">
+    </head>
+
+    <body x-data="{
+            cart: JSON.parse(localStorage.getItem('cart')||'{}'),
+            length: 0,
+            cartOpen: false,
+            sum: 0,
+            positions: 0,
+            preorderOpen: false,
+            orderOpen: false,
+            callbackOpen: false,
+            thanksOpen: false,
+            mobileOpen: false,
+        }"
+          x-effect="length = Object.keys(cart).length">
+
+        <header>
+            <div class="top-menu">
+                <a class="logo" href="/">
+                    <img src="img/logo-klever.png" alt="">
+                </a>
+                <p class="tagline">
+                    Создаём <span class="accent-word">любовь</span> через цветы
+                </p>
+                <div class="contacts">
+                    <div class="social">
+                        <a href="https://vk.com/">
+                            <i class="uil uil-vk-alt"></i>
+                        </a>
+                        <a href="https://whatsapp.com/">
+                            <i class="uil uil-whatsapp"></i>
+                        </a>
+                        <a href="https://telegram.org/">
+                            <i class="uil uil-telegram-alt"></i>
+                        </a>
+                    </div>
+                    <a class="phone" href="tel:+78005553535">
+                        <i class="uil uil-phone-alt"></i>
+                        <span>8 (800) 555-35-35</span>
+                    </a>
+                    <button class="base-button" @click="callbackOpen=true">
+                        Заказать звонок
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <nav class="sticky-menu"
+             x-effect="
+                sum = 0;
+                positions = 0;
+                Object.values(cart).forEach((value) => {
+                    sum += value['cost'] * value['quant'];
+                    positions += value['quant'];
+                });">
+            <a class="mobile-menu" href="#" @click.prevent="mobileOpen=!mobileOpen">
+                <i class="uil uil-list-ul"></i>
+            </a>
+            <div class="items"
+                 :data-open="mobileOpen">
+                <a href="roses.html" class="item">Розы</a>
+                <a href="bouquet.html" class="item">Букеты</a>
+                <a href="delivery.html" class="item">Доставка</a>
+                <a href="reviews.html" class="item">Отзывы</a>
+                <a href="about-us.html" class="item">О нас</a>
+            </div>
+            <a class="cart" href="#" @click.prevent="cartOpen=true">
+                <span x-text="length!=0 ? (
+                                'Сумма: '+ new Intl.NumberFormat(
+                                'ru-RU', {
+                                    style: 'currency',
+                                    currency: 'RUB',
+                                    maximumFractionDigits: 0,
+                                }).format(sum)
+                            ) : 'Корзина пуста'">
+                </span>
+                <i class="uil uil-shopping-cart"></i>
+                <span class="quant" x-text="length" x-show="length!=0"></span>
+            </a>
+            <div class="item-list cart-list"
+                 x-cloak
+                 x-show="cartOpen"
+                 x-transition.opacity>
+                <div class="buttons" :class="length==0&&'empty'">
+                    <template x-if="length==0">
+                        <strong>Корзина пуста</strong>
+                    </template>
+                    <strong x-show="length!=0">Корзина</strong>
+                    <button class="base-button clear"
+                            x-show="length!=0"
+                            title="Очистить корзину"
+                            @click="
+                                cart = JSON.parse('{}');
+                                localStorage.setItem('cart', JSON.stringify(cart));
+                                cartOpen = false;">
+                        <i class="uil uil-trash-alt"></i>
+                    </button>
+                    <button class="base-button close"
+                            title="Закрыть"
+                            @click.prevent="cartOpen=false">
+                        <i class="uil uil-multiply"></i>
+                    </button>
+                </div>
+                <template x-for="item in cart">
+                    <div class="item">
+                        <span class="name" x-text="item['name']"></span>
+                        -
+                        <div class="cost-quant">
+                            <span x-text="item['cost']"></span>
+                            x
+                            <span x-text="item['quant']"></span>
+                        </div>
+                    </div>
+                </template>
+                <div class="bottom" x-show="length!=0">
+                    <span class="sum" x-text="'Сумма: '+ new Intl.NumberFormat(
+                        'ru-RU', {
+                            style: 'currency',
+                            currency: 'RUB',
+                            maximumFractionDigits: 0,
+                        }).format(sum)">
+                    </span>
+                    <button class="base-button"
+                            @click.prevent="cartOpen=false;preorderOpen=true">
+                        Заказать
+                    </button>
+                </div>
+            </div>
+            <div class="modal-wrap" x-cloak x-show="preorderOpen"
+                 x-transition.opacity>
+                <div class="preorder"
+                     @click.away="preorderOpen=false">
+                    <div class="buttons">
+                        <button class="base-button clear"
+                                title="Очистить корзину"
+                                @click.prevent="
+                                        cart = JSON.parse('{}');
+                                        localStorage.setItem('cart', JSON.stringify(cart));
+                                        preorderOpen = false;">
+                            <i class="uil uil-trash-alt"></i>
+                        </button>
+                        <button class="base-button close"
+                                title="Закрыть"
+                                @click.prevent="preorderOpen=false">
+                            <i class="uil uil-multiply"></i>
+                        </button>
+                    </div>
+                    <div class="item-list">
+                        <template x-for="item in cart">
+                            <div class="item">
+                                <span class="name" x-text="item['name']"></span>
+                                -
+                                <div class="cost-quant">
+                                    <span x-text="item['cost']"></span>
+                                    x
+                                    <span x-text="item['quant']"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <span class="sum" x-text="'Сумма: '+ new Intl.NumberFormat(
+                        'ru-RU', {
+                            style: 'currency',
+                            currency: 'RUB',
+                            maximumFractionDigits: 0,
+                        }).format(sum)">
+                    </span>
+                    <button class="base-button"
+                            @click.prevent="preorderOpen=false">
+                        Продолжить покупки
+                    </button>
+                    <button class="base-button"
+                            @click.prevent="
+                                preorderOpen=false;
+                                orderOpen=true;">
+                        Оформить заказ
+                    </button>
+                </div>
+            </div>
+            <div class="modal-wrap" x-cloak x-show="orderOpen"
+                 x-transition.opacity>
+                <form action="" class="order"
+                      @click.away="orderOpen=false"
+                      @submit.prevent="
+                        orderOpen=false;
+                        thanksOpen=true;
+                        cart = JSON.parse('{}');
+                        localStorage.setItem('cart', JSON.stringify(cart));">
+                    <span>Форма заказа</span>
+                    <span class="positions" x-text="
+                        'Позиций: ' + positions
+                    "></span>
+                    <span class="sum" x-text="
+                        'Сумма: '+ new Intl.NumberFormat(
+                            'ru-RU', {
+                                style: 'currency',
+                                currency: 'RUB',
+                                maximumFractionDigits: 0,
+                            }).format(sum)
+                    "></span>
+                    <input type="text" name="name" placeholder="Ваше имя"
+                           required="" pattern="^[А-Яа-яЁё ]+$">
+                    <input type="text" name="phone"
+                           placeholder="Номер телефона"
+                           required="" pattern="[0-9+]{11,12}"
+                           maxlength="12">
+                    <input class="base-button" type="submit"
+                           value="Отправить">
+                </form>
+            </div>
+            <div class="modal-wrap" x-cloak x-show="callbackOpen"
+                 x-transition.opacity>
+                <form action="" class="callback"
+                      @click.away="callbackOpen=false"
+                      @submit.prevent="
+                        callbackOpen=false;
+                        thanksOpen=true;">
+                    <span>Форма заявки</span>
+                    <p>Пожалуйста, заполните простую форму и мы свяжемся с
+                        вами
+                        в ближайшее время</p>
+                    <input type="text" name="name" placeholder="Ваше имя"
+                           required="" pattern="^[А-Яа-яЁё ]+$">
+                    <input type="text" name="phone"
+                           placeholder="Номер телефона"
+                           required="" pattern="[0-9+]{11,12}"
+                           maxlength="12">
+                    <input class="base-button" type="submit"
+                           value="Отправить">
+                </form>
+            </div>
+            <div class="modal-wrap" x-cloak x-show="thanksOpen"
+                 x-transition.opacity>
+                <div class="thanks" @click.away="thanksOpen=false">
+                    <span>Спасибо за заявку!</span>
+                    <p>Наши специалисты свяжутся с вами в течение 15 минут
+                    </p>
+                </div>
+            </div>
+        </nav>
+
+        <div class="sticky-rect"></div>
+
+        <main>
+            <section class="hero">
+                <!-- Slider main container -->
+                <div class="swiper">
+                    <!-- Additional required wrapper -->
+                    <div class="swiper-wrapper">
+                        <!-- Slides -->
+                        <div class="swiper-slide">
+                            <div class="background">
+                                <img src="img/roses-slide.jpg" alt="">
+                            </div>
+                            <div class="foreground">
+                                <a href="roses.html">
+                                    <span>Розы любых сортов и размеров от 75
+                                        рублей!</span>
+                                    <p>Большой ассортимент и низкие цены</p>
+                                    <div class="clover"></div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="background">
+                                <img src="img/devushka-s-buketom-rozovyh-roz.jpg"
+                                     alt="">
+                            </div>
+                            <div class="foreground">
+                                <a href="delivery.html">
+                                    <span>Доставка свежих цветов по всей
+                                        Уфе!</span>
+                                    <p>Подарите нежность и заботу</p>
+                                    <div class="clover"></div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="background">
+                                <img src="img/krasivyj-buket-v-korzinke-na-stole.jpg"
+                                     alt="">
+                            </div>
+                            <div class="foreground">
+                                <a href="bouquet.html">
+                                    <span>Букеты любой сложности из любых
+                                        цветов!</span>
+                                    <p>Большой ассортимент цветов со всего
+                                        света</p>
+                                    <div class="clover"></div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-controls">
+                        <div class="swiper-button-prev"></div>
+                        <div class="swiper-pagination"></div>
+                        <div class="swiper-button-next"></div>
+                    </div>
+            </section>
+
+            <section class="merits">
+                <h1>Доставка цветов в <span class="accent-word">Уфе</span></h1>
+                <div class="container">
+                    <div class="merit-card">
+                        <img src="img/features-1.svg" alt="">
+                        <p>
+                            <span>Доставка по Уфе</span>
+                            за 2 часа
+                        </p>
+                    </div>
+                    <div class="merit-card">
+                        <img src="img/features-2.svg" alt="">
+                        <p>
+                            <span>Розы от 75 рублей</span>
+                            у нас низкие цены!
+                        </p>
+                    </div>
+                    <div class="merit-card">
+                        <img src="img/features-3.svg" alt="">
+                        <p>
+                            <span>Гарантия свежести</span>
+                            поставки каждый день
+                        </p>
+                    </div>
+                    <div class="merit-card">
+                        <img src="img/features-4.svg" alt="">
+                        <p>
+                            <span>Пришлем фото букета</span>
+                            перед отправкой
+                        </p>
+                    </div>
+                </div>
+            </section>
+            <div class="separator">
+                <div class="line"></div>
+                <svg version="1.1" id="Layer_1"
+                     xmlns="http://www.w3.org/2000/svg"
+                     xmlns:xlink="http://www.w3.org/1999/xlink"
+                     viewBox="0 0 512 512" xml:space="preserve">
+                    <g>
+                        <g>
+                            <path d="M490.519,256.023c6.807-7.913,12.218-17.001,15.907-26.81c3.7-10.007,5.574-20.468,5.574-31.104
+			c0-49.024-39.866-88.913-88.879-88.913c-7.971,0-15.837,1.059-23.471,3.153c2.095-7.633,3.153-15.488,3.153-23.471
+			C402.804,39.866,362.915,0,313.891,0c-10.624,0-21.097,1.873-31.162,5.597c-9.763,3.665-18.839,9.076-26.752,15.884
+			c-7.901-6.819-16.989-12.207-26.764-15.86C219.229,1.897,208.756,0,198.074,0c-49.012,0-88.879,39.866-88.879,88.879
+			c0,7.983,1.059,15.837,3.154,23.471c-7.633-2.095-15.5-3.154-23.471-3.154C39.866,109.196,0,149.062,0,198.074
+			c0,10.682,1.897,21.155,5.62,31.127c3.654,9.786,9.053,18.874,15.86,26.775c-6.807,7.913-12.218,17.001-15.907,26.81
+			C1.873,292.794,0,303.255,0,313.891c0,49.024,39.866,88.913,88.879,88.913c7.971,0,15.837-1.059,23.471-3.153
+			c-2.095,7.633-3.154,15.488-3.154,23.471c0,49.012,39.889,88.879,88.913,88.879c10.624,0,21.097-1.873,31.162-5.597
+			c9.763-3.665,18.839-9.076,26.752-15.884c7.901,6.819,16.989,12.206,26.764,15.86c9.984,3.724,20.457,5.62,31.139,5.62
+			c49.012,0,88.879-39.866,88.879-88.879c0-7.982-1.059-15.837-3.153-23.471c7.633,2.095,15.5,3.153,23.471,3.153
+			c49.012,0,88.879-39.866,88.879-88.879c0-10.682-1.897-21.155-5.62-31.127C502.737,273.012,497.327,263.924,490.519,256.023z
+			 M198.074,23.273c7.889,0,15.628,1.396,23.005,4.154c8.739,3.258,16.721,8.425,23.319,15.046v53.341
+			c0,6.423,5.213,11.636,11.636,11.636c6.423,0,11.636-5.213,11.636-11.636V42.368c6.598-6.575,14.545-11.718,23.191-14.964
+			c7.412-2.746,15.162-4.131,23.028-4.131c36.201,0,65.641,29.428,65.641,65.606c0,7.889-1.396,15.616-4.154,22.982
+			c-3.258,8.716-8.46,16.78-15.046,23.354c-0.012,0.012-0.023,0.023-0.035,0.035L256,239.546l-104.32-104.32
+			c-6.586-6.563-11.799-14.639-15.057-23.354c-2.758-7.377-4.154-15.104-4.154-22.993C132.468,52.701,161.897,23.273,198.074,23.273
+			z M111.872,375.377c-7.377,2.758-15.104,4.154-22.993,4.154c-36.177,0-65.606-29.44-65.606-65.641
+			c0-7.866,1.385-15.616,4.108-22.97c3.258-8.669,8.39-16.617,14.929-23.203h53.457c6.423,0,11.636-5.201,11.636-11.636
+			c0-6.423-5.213-11.636-11.636-11.636H42.531c-6.656-6.598-11.834-14.604-15.104-23.377c-2.758-7.366-4.154-15.104-4.154-22.993
+			c0-36.177,29.428-65.606,65.606-65.606c7.889,0,15.616,1.396,22.993,4.154c8.716,3.258,16.791,8.471,23.377,15.081L239.546,256
+			l-104.32,104.32C128.663,366.906,120.588,372.119,111.872,375.377z M313.926,488.727c-7.889,0-15.628-1.396-23.005-4.154
+			c-8.704-3.247-16.663-8.39-23.249-14.988v-53.236c0-6.423-5.213-11.636-11.636-11.636c-6.423,0-11.636,5.213-11.636,11.636v53.225
+			c-6.609,6.598-14.58,11.764-23.261,15.023c-7.412,2.746-15.162,4.131-23.028,4.131c-36.201,0-65.641-29.428-65.641-65.606
+			c0-7.889,1.396-15.616,4.154-22.982c3.258-8.716,8.46-16.78,15.046-23.354L256,272.454l104.285,104.285
+			c0.012,0.023,0.035,0.035,0.058,0.058c3.293,3.281,6.225,6.935,8.762,10.857c2.525,3.933,4.643,8.122,6.272,12.474
+			c2.758,7.377,4.154,15.104,4.154,22.993C379.532,459.299,350.103,488.727,313.926,488.727z M416.303,267.718h53.329
+			c6.575,6.575,11.706,14.522,14.941,23.215c2.758,7.366,4.154,15.104,4.154,22.993c0,36.177-29.428,65.606-65.606,65.606
+			c-7.889,0-15.616-1.396-22.982-4.154c-8.727-3.258-16.803-8.471-23.389-15.081L272.454,256l104.32-104.32
+			c6.563-6.586,14.639-11.799,23.354-15.057c7.378-2.758,15.104-4.154,22.993-4.154c36.177,0,65.606,29.44,65.606,65.641
+			c0,7.866-1.385,15.616-4.108,22.97c-3.293,8.751-8.471,16.756-15.092,23.366h-53.225c-6.423,0-11.636,5.213-11.636,11.636
+			C404.666,262.516,409.879,267.718,416.303,267.718z" />
+                        </g>
+                    </g>
+                </svg>
+                <div class="line"></div>
+            </div>
+            <section class="roses">
+                <h2>Прекрасные <span class="accent-word">Розы</span></h2>
+                <div class="container">
+                    <div class="item-card">
+                        <a>
+                            <img src="img/roses/roses-0.jpg" alt="">
+                            25 красных роз (сорт «Freedom»)
+                        </a>
+                        <span>4 570 руб</span>
+                        <button class="base-button"
+                                @click="
+                                if (cart['roses-1']) {
+                                    cart['roses-1']['quant'] += 1;
+                                } else {
+                                    cart['roses-1'] = {
+                                        name: '25 красных роз (сорт «Freedom»)',
+                                        cost: 4570,
+                                        quant: 1,
+                                    };
+                                };
+                                localStorage.setItem('cart', JSON.stringify(cart));
+                                preorderOpen=true;">
+                            Заказать
+                        </button>
+                    </div>
+                    <div class="item-card">
+                        <a>
+                            <img src="img/roses/roses-1.jpg" alt="">
+                            Букет «Яркая кокетка»
+                        </a>
+                        <span>2 730 руб</span>
+                        <button class="base-button"
+                                @click="
+                                if (cart['roses-2']) {
+                                    cart['roses-2']['quant'] += 1;
+                                } else {
+                                    cart['roses-2'] = {
+                                        name: 'Букет «Яркая кокетка»',
+                                        cost: 2730,
+                                        quant: 1,
+                                    };
+                                };
+                                localStorage.setItem('cart', JSON.stringify(cart));
+                                preorderOpen=true;">
+                            Заказать
+                        </button>
+                    </div>
+                    <div class="item-card">
+                        <a>
+                            <img src="img/roses/roses-3.jpg" alt="">
+                            Букет «Нежная кокетка»
+                        </a>
+                        <span>2 730 руб</span>
+                        <button class="base-button"
+                                @click="
+                                if (cart['roses-3']) {
+                                    cart['roses-3']['quant'] += 1;
+                                } else {
+                                    cart['roses-3'] = {
+                                        name: 'Букет «Нежная кокетка»',
+                                        cost: 2730,
+                                        quant: 1,
+                                    };
+                                };
+                                localStorage.setItem('cart', JSON.stringify(cart));
+                                preorderOpen=true;">
+                            Заказать
+                        </button>
+                    </div>
+                    <div class="item-card">
+                        <a>
+                            <img src="img/roses/roses-2.jpg" alt="">
+                            25 красных роз в упаковке (сорт «Freedom»)
+                        </a>
+                        <span>4 850 руб</span>
+                        <button class="base-button"
+                                @click="
+                                if (cart['roses-4']) {
+                                    cart['roses-4']['quant'] += 1;
+                                } else {
+                                    cart['roses-4'] = {
+                                        name: '25 красных роз в упаковке (сорт «Freedom»)',
+                                        cost: 4850,
+                                        quant: 1,
+                                    };
+                                };
+                                localStorage.setItem('cart', JSON.stringify(cart));
+                                preorderOpen=true;">
+                            Заказать
+                        </button>
+                    </div>
+                    <div class="item-card">
+                        <a>
+                            <img src="img/roses/roses-4.jpg" alt="">
+                            25 белых роз Эквадор
+                        </a>
+                        <span>4 570 руб</span>
+                        <button class="base-button"
+                                @click="
+                                if (cart['roses-5']) {
+                                    cart['roses-5']['quant'] += 1;
+                                } else {
+                                    cart['roses-5'] = {
+                                        name: '25 белых роз Эквадор',
+                                        cost: 4570,
+                                        quant: 1,
+                                    };
+                                };
+                                localStorage.setItem('cart', JSON.stringify(cart));
+                                preorderOpen=true;">
+                            Заказать
+                        </button>
+                    </div>
+                    <div class="item-card">
+                        <a>
+                            <img src="img/roses/roses-5.jpg" alt="">
+                            Букет «Французское кружево»
+                        </a>
+                        <span>3 060 руб</span>
+                        <button class="base-button"
+                                @click="
+                                if (cart['roses-6']) {
+                                    cart['roses-6']['quant'] += 1;
+                                } else {
+                                    cart['roses-6'] = {
+                                        name: 'Букет «Французское кружево»',
+                                        cost: 3060,
+                                        quant: 1,
+                                    };
+                                };
+                                localStorage.setItem('cart', JSON.stringify(cart));
+                                preorderOpen=true;">
+                            Заказать
+                        </button>
+                    </div>
+                    <div class="item-card">
+                        <a>
+                            <img src="img/roses/roses-7.jpg" alt="">
+                            Букет «Сливочное мороженое»
+                        </a>
+                        <span>3 916 руб</span>
+                        <button class="base-button"
+                                @click="
+                                if (cart['roses-7']) {
+                                    cart['roses-7']['quant'] += 1;
+                                } else {
+                                    cart['roses-7'] = {
+                                        name: 'Букет «Сливочное мороженое»',
+                                        cost: 3916,
+                                        quant: 1,
+                                    };
+                                };
+                                localStorage.setItem('cart', JSON.stringify(cart));
+                                preorderOpen=true;">
+                            Заказать
+                        </button>
+                    </div>
+                    <a class="see-more" href="roses.html">
+                        <svg id="round-text" viewBox="0 0 100 100"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path id="circlePath" fill="none"
+                                  stroke-width="4"
+                                  d="
+                                    M 20, 50
+                                    a 30,30 0 1,1 60,0
+                                    a 30,30 0 1,1 -60,0
+                                  " />
+                            <text id="text" font-family="Comfortaa"
+                                  font-size="12" font-weight="bold"
+                                  fill="var(--brown)">
+                                <textPath id="textPath" href="#circlePath"
+                                          textLength="188">
+                                    Посмотреть всё&nbsp
+                                    Посмотреть всё&nbsp
+                                </textPath>
+                            </text>
+                        </svg>
+                        <svg id="rose" version="1.1" id="Capa_1"
+                             xmlns="http://www.w3.org/2000/svg"
+                             xmlns:xlink="http://www.w3.org/1999/xlink"
+                             viewBox="0 0 461.046 461.046"
+                             xml:space="preserve">
+                            <path d="M460.783,125.589c0.505-1.324,0.272-2.817-0.613-3.924c-0.885-1.107-2.287-1.66-3.693-1.461
+	c-8.802,1.269-18.55-1.899-29.839-5.563c-22.632-7.345-50.723-16.44-90.371,2.558c-8.955-4.386-18.912-7.067-29.472-7.57
+	l-1.113-0.053l-14.401-16.758c-10.405-12.119-27.033-17.078-42.358-12.636c-7.973,2.301-14.934,6.888-20.204,13.289l-16.611-3.756
+	c-23.776-5.374-48.045,4.14-61.833,24.241l-9.787,14.271c-9.281,0.716-18.396,3.976-26.224,9.774l-0.396,0.293
+	c-16.493,12.217-23.487,32.48-19.388,51.372c-13.574,2.237-54.299,11.458-93.112,45.357c-1.067,0.933-1.562,2.36-1.299,3.753
+	c0.262,1.393,1.242,2.543,2.576,3.023c8.362,3.01,15.485,10.377,23.733,18.908c16.644,17.214,38.935,40.277,87.344,40.274
+	c3.459,0,7.064-0.125,10.799-0.372c4.15,6.594,9.523,12.488,15.99,17.392l1.505,1.142c13.869,10.516,30.645,16.123,47.894,16.123
+	c2.406,0,4.824-0.109,7.243-0.33c14.359-1.308,27.911-6.467,39.387-14.802c4.805,12.009,20.321,40.471,64.646,61.934
+	c0.552,0.268,1.148,0.4,1.743,0.4c0.761,0,1.519-0.217,2.178-0.645c14.75-9.575,22.701-24.361,22.991-42.762
+	c0.109-6.92-0.883-13.091-1.908-17.55c6.152,1.434,12.517,2.193,18.999,2.193c1.901,0,3.813-0.064,5.731-0.194l84.554-5.732
+	c1.257-0.085,2.401-0.758,3.086-1.815c0.685-1.058,0.832-2.376,0.396-3.559c-0.601-1.628-14.588-38.803-47.227-64.783
+	c10.029-10.377,13.816-25.122,9.698-39.561C413.253,198.661,443.296,171.409,460.783,125.589z M375.331,163.39
+	c-0.526-1.779-1.118-3.53-1.77-5.252l18.709-6.662l32.211,21.853c-4.603,5.813-9.111,10.824-13.242,15.04L375.331,163.39z
+	 M401.614,148.148l48.334-17.212c-6.112,14.009-13.357,26-20.628,36.009L401.614,148.148z M438.444,126.541l-51.012,18.166
+	l2.483-30.424c12.942,1.053,24.173,4.695,34.252,7.966C429.165,123.871,433.884,125.4,438.444,126.541z M381.912,113.986
+	l-2.747,33.664l-8.842,3.149c-5.889-11.618-14.704-21.517-25.51-28.701C358.579,116.248,370.845,114.072,381.912,113.986z
+	 M306.415,117.62c33.946,1.615,61.032,28.23,63.778,61.573c-2.337-0.5-4.735-0.814-7.174-0.911l-35.697-1.428l-17.166-22.506
+	c5.883-11.328,4.741-24.592-3.423-35.144c-0.437-0.565-0.892-1.105-1.354-1.634L306.415,117.62z M177.324,150.657
+	c4.998,17.981,16.924,32.738,32.936,41.374c-12.364-2.134-27.556-7.02-41.474-17.817c-5.443-4.222-7.779-11.026-6.097-17.755
+	c1.339-5.359,5.715-11.59,13.979-13.008c6.082-1.044,11.778-2.008,16.072-2.732c-2.693,5.812-3.768,12.112-4.081,17.655
+	c-1.473-3.194-2.701-6.534-3.663-9.984c-0.608-2.18-2.91-3.433-5.091-2.729C177.86,146.32,176.748,148.585,177.324,150.657z
+	 M169.797,184.761c22.113,14.597,45.537,16.857,57.884,16.857c3.688,0,6.382-0.201,7.763-0.333
+	c26.334,9.85,45.738,32.157,51.804,59.71l-50.437,16.813c-16.252,5.419-33.471,2.673-47.234-7.533
+	c-13.764-10.205-21.392-25.882-20.929-43.01L169.797,184.761z M240.132,162.57c13.213-4.542,21.028-13.575,24.919-19.437
+	l11.409,14.084c-11.738,12.162-19.624,27.422-22.789,44.062c-6.458-3.923-13.47-7.09-20.939-9.359l-10.429-3.168
+	c-2.666-0.81-5.215-1.826-7.649-3.017l-0.279-24.894C219.919,164.031,228.575,166.544,240.132,162.57z M223.891,156.033
+	c2.316-6.467,5.55-11.825,9.213-16.232l4.712,15.098c-0.096,0.034-0.187,0.071-0.284,0.104
+	C232.07,156.882,227.518,156.863,223.891,156.033z M255.532,142.468c-2.481,2.959-5.908,6.251-10.414,8.979l-5.278-16.913
+	C246.855,133.01,252.786,139.022,255.532,142.468z M247.968,127.235c4.972-2.957,9.58-4.777,12.794-5.825
+	c0.579,3.786,2.957,7.013,6.54,8.693l13.221,6.203c2.852,1.338,4.73,3.896,5.152,7.019c0.422,3.122-0.709,6.087-3.104,8.134
+	c-0.095,0.081-0.184,0.168-0.278,0.249l-14.714-18.164c-0.879-1.085-2.264-1.627-3.648-1.44s-2.573,1.09-3.132,2.37
+	c-0.011,0.024-0.199,0.443-0.573,1.142C257.116,132.2,252.885,128.838,247.968,127.235z M284.146,270.462
+	c0,0,9.513-3.215,9.757-3.36l0.005,0.008c0.779-0.465,1.752-0.416,2.499,0.101c5.944,4.117,12.428,7.047,19.145,8.794l-7.35,30.013
+	c-12.143-6.836-22.379-17.039-29.303-29.812L284.146,270.462z M294.613,257.375c-4.976-20.532-16.744-38.287-33.049-50.721
+	c2.224-4.766,8.181-15.21,21.041-24.854c0.562-0.421,1.237-0.905,2.008-1.458c4.663-3.341,13.093-9.382,20.828-18.983l16.659,21.842
+	c7.693,10.087,10.727,23.016,8.322,35.471c-2.404,12.456-10.032,23.326-20.926,29.825L294.613,257.375z M300.406,124.1
+	c5.42,7.005,8.721,19.189,0.187,30.472c-7.396,9.778-15.686,15.718-20.639,19.267c-0.825,0.591-1.547,1.109-2.148,1.56
+	c-4.134,3.1-7.627,6.272-10.569,9.353c4.728-10.361,11.689-19.65,20.535-27.214c4.434-3.791,6.614-9.505,5.833-15.286
+	c-0.782-5.781-4.401-10.711-9.683-13.189l-13.221-6.203c-1.979-0.929-2.093-2.804-2.081-3.357c0.013-0.553,0.21-2.421,2.229-3.26
+	c3.479-1.446,6.81-2.066,9.928-2.066C289.409,114.177,296.409,118.935,300.406,124.1z M227.411,118.203
+	c0.275-6.959,2.684-13.533,6.96-19.008c4.295-5.483,10.094-9.4,16.774-11.328c12.328-3.572,25.698,0.416,34.067,10.163l9.472,11.022
+	l-0.685-0.033c-8.033-3.646-17.333-3.857-26.222-0.163c-1.935,0.804-3.55,2.058-4.756,3.615
+	c-2.776,0.635-13.092,3.378-23.717,10.865c-4.266-0.804-8.275-1.253-12.038-1.366L227.411,118.203z M231.071,130.201
+	c-5.747,5.664-10.989,13.035-14.496,22.558c-1.967-1.402-3.019-2.687-3.13-2.827c-1.051-1.36-2.855-1.897-4.479-1.333
+	c-1.624,0.564-2.706,2.104-2.686,3.823l0.318,28.41c-3.399-2.518-6.483-5.431-9.219-8.67c-0.412-2.33-3.858-23.916,7.502-35.161
+	C210.608,131.332,219.397,129.057,231.071,130.201z M156.872,118.481c11.922-17.384,32.912-25.612,53.471-20.963l13.653,3.087
+	c-2.769,5.317-4.337,11.18-4.579,17.287l-0.168,4.408c-8.22,0.981-14.927,3.987-20.021,9.042c-0.068,0.068-0.129,0.14-0.197,0.208
+	c-1.111,0.185-11.663,1.947-23.715,4.015c-1.091,0.187-2.149,0.451-3.183,0.764c-6.771-4.432-14.34-7.069-22.059-7.936
+	L156.872,118.481z M118.629,144.723l0.396-0.293c13.095-9.699,30.462-10.989,44.72-3.733c-4.279,3.396-7.406,8.174-8.818,13.822
+	c-2.253,9.012,0.439,18.113,7.026,24.343l-0.535,19.795l-19.342,13.784c-6.35,4.525-11.719,9.994-15.984,16.152l-17.396-25.708
+	C95.854,183.908,100.218,158.36,118.629,144.723z M56.615,209.596l27.355,25.201l-68.947-0.657
+	C29.392,222.989,43.827,215.122,56.615,209.596z M32.13,255.146c-4.657-4.816-8.987-9.275-13.492-12.971l45.396,0.433
+	l-19.419,24.844C40.068,263.352,35.995,259.144,32.13,255.146z M50.727,272.621l23.385-29.917l28.771,0.274L79.221,287.98
+	C67.634,284.233,58.465,278.726,50.727,272.621z M87.112,290.162l24.764-47.098l6.69,0.064c-2.496,6.828-3.865,14.134-3.977,21.698
+	c-0.146,9.873,1.852,19.376,5.744,27.998C107.51,293.388,96.572,292.341,87.112,290.162z M95.901,234.911l-31.086-28.639
+	c14.934-5.659,26.712-8.002,32.022-8.858c1.349,3.431,3.08,6.771,5.233,9.953l18.799,27.782L95.901,234.911z M196.428,326.971
+	c-17.754,1.615-35.366-3.426-49.577-14.201l-1.505-1.142c-14.737-11.175-23.032-28.19-22.758-46.683
+	c0.274-18.493,9.069-35.255,24.131-45.989l14.429-10.283l-0.474,17.539c-0.535,19.804,8.354,38.866,24.306,50.613
+	c10.501,7.733,22.73,11.716,35.223,11.716c6.376,0,12.821-1.038,19.14-3.144l29.221-9.74l-25.94,28.389
+	C230.594,317.211,214.188,325.353,196.428,326.971z M252.799,332.895c-5.726-8.174-8.514-14.803-9.678-18.079
+	c1.878-1.697,3.685-3.487,5.409-5.373l17.896-19.586l4.194,11.525L252.799,332.895z M258.087,339.796l16.131-28.526l21.436,58.903
+	C278.1,360.354,266.144,349.451,258.087,339.796z M304.873,372.111l-12.721-34.956l26.519,13.195
+	C316.508,359.113,311.898,366.396,304.873,372.111z M320.096,339.182c-0.02,0.973-0.066,1.931-0.133,2.876l-31.782-15.814
+	l-15.667-43.051l0.72-0.788c10.09,17.25,25.747,29.995,43.971,36.476C318.242,322.244,320.279,330.069,320.096,339.182z
+	 M334.537,314.941c-6.591-0.936-12.968-2.727-18.986-5.299l7.872-32.146c2.359,0.284,4.732,0.432,7.107,0.432
+	c2.332,0,4.665-0.142,6.988-0.417l2.993,1.244L334.537,314.941z M373.903,313.935l-23.523,1.595
+	c-2.635,0.178-5.255,0.21-7.852,0.119l5.57-33.739l27.863,11.583L373.903,313.935z M381.999,313.386l1.68-16.685l34.274,14.248
+	L381.999,313.386z M427.485,306.247l-55.436-23.045l30.177-14.67C414.789,282.484,423.048,297.165,427.485,306.247z M396.419,262.46
+	l-34.234,16.642l-11.387-4.734c4.791-1.73,9.431-4.085,13.802-7.085l20.6-14.143c0.11-0.076,0.215-0.155,0.324-0.232
+	C389.421,255.932,393.048,259.147,396.419,262.46z M380.672,246.545l-20.6,14.143c-17.442,11.974-39.792,12.229-57.303,1.137
+	l10.826-6.457c12.85-7.665,21.847-20.487,24.683-35.179c2.326-12.047,0.332-24.467-5.463-35.109l30.48,1.219
+	c17.56,0.703,27.229,12.783,30.422,23.855C396.91,221.225,395.16,236.599,380.672,246.545z M398.319,200.286
+	c-4.368-8.272-11.47-14.724-19.954-18.455c-0.091-2.363-0.293-4.698-0.597-7.001l27.639,19.227
+	C402.735,196.545,400.331,198.627,398.319,200.286z" />
+                        </svg>
+                    </a>
+                </div>
+            </section>
+
+            <div class="separator">
+                <div class="line"></div>
+                <svg version="1.1" id="Layer_1"
+                     xmlns="http://www.w3.org/2000/svg"
+                     xmlns:xlink="http://www.w3.org/1999/xlink"
+                     viewBox="0 0 512 512" xml:space="preserve">
+                    <g>
+                        <g>
+                            <path d="M490.519,256.023c6.807-7.913,12.218-17.001,15.907-26.81c3.7-10.007,5.574-20.468,5.574-31.104
+			c0-49.024-39.866-88.913-88.879-88.913c-7.971,0-15.837,1.059-23.471,3.153c2.095-7.633,3.153-15.488,3.153-23.471
+			C402.804,39.866,362.915,0,313.891,0c-10.624,0-21.097,1.873-31.162,5.597c-9.763,3.665-18.839,9.076-26.752,15.884
+			c-7.901-6.819-16.989-12.207-26.764-15.86C219.229,1.897,208.756,0,198.074,0c-49.012,0-88.879,39.866-88.879,88.879
+			c0,7.983,1.059,15.837,3.154,23.471c-7.633-2.095-15.5-3.154-23.471-3.154C39.866,109.196,0,149.062,0,198.074
+			c0,10.682,1.897,21.155,5.62,31.127c3.654,9.786,9.053,18.874,15.86,26.775c-6.807,7.913-12.218,17.001-15.907,26.81
+			C1.873,292.794,0,303.255,0,313.891c0,49.024,39.866,88.913,88.879,88.913c7.971,0,15.837-1.059,23.471-3.153
+			c-2.095,7.633-3.154,15.488-3.154,23.471c0,49.012,39.889,88.879,88.913,88.879c10.624,0,21.097-1.873,31.162-5.597
+			c9.763-3.665,18.839-9.076,26.752-15.884c7.901,6.819,16.989,12.206,26.764,15.86c9.984,3.724,20.457,5.62,31.139,5.62
+			c49.012,0,88.879-39.866,88.879-88.879c0-7.982-1.059-15.837-3.153-23.471c7.633,2.095,15.5,3.153,23.471,3.153
+			c49.012,0,88.879-39.866,88.879-88.879c0-10.682-1.897-21.155-5.62-31.127C502.737,273.012,497.327,263.924,490.519,256.023z
+			 M198.074,23.273c7.889,0,15.628,1.396,23.005,4.154c8.739,3.258,16.721,8.425,23.319,15.046v53.341
+			c0,6.423,5.213,11.636,11.636,11.636c6.423,0,11.636-5.213,11.636-11.636V42.368c6.598-6.575,14.545-11.718,23.191-14.964
+			c7.412-2.746,15.162-4.131,23.028-4.131c36.201,0,65.641,29.428,65.641,65.606c0,7.889-1.396,15.616-4.154,22.982
+			c-3.258,8.716-8.46,16.78-15.046,23.354c-0.012,0.012-0.023,0.023-0.035,0.035L256,239.546l-104.32-104.32
+			c-6.586-6.563-11.799-14.639-15.057-23.354c-2.758-7.377-4.154-15.104-4.154-22.993C132.468,52.701,161.897,23.273,198.074,23.273
+			z M111.872,375.377c-7.377,2.758-15.104,4.154-22.993,4.154c-36.177,0-65.606-29.44-65.606-65.641
+			c0-7.866,1.385-15.616,4.108-22.97c3.258-8.669,8.39-16.617,14.929-23.203h53.457c6.423,0,11.636-5.201,11.636-11.636
+			c0-6.423-5.213-11.636-11.636-11.636H42.531c-6.656-6.598-11.834-14.604-15.104-23.377c-2.758-7.366-4.154-15.104-4.154-22.993
+			c0-36.177,29.428-65.606,65.606-65.606c7.889,0,15.616,1.396,22.993,4.154c8.716,3.258,16.791,8.471,23.377,15.081L239.546,256
+			l-104.32,104.32C128.663,366.906,120.588,372.119,111.872,375.377z M313.926,488.727c-7.889,0-15.628-1.396-23.005-4.154
+			c-8.704-3.247-16.663-8.39-23.249-14.988v-53.236c0-6.423-5.213-11.636-11.636-11.636c-6.423,0-11.636,5.213-11.636,11.636v53.225
+			c-6.609,6.598-14.58,11.764-23.261,15.023c-7.412,2.746-15.162,4.131-23.028,4.131c-36.201,0-65.641-29.428-65.641-65.606
+			c0-7.889,1.396-15.616,4.154-22.982c3.258-8.716,8.46-16.78,15.046-23.354L256,272.454l104.285,104.285
+			c0.012,0.023,0.035,0.035,0.058,0.058c3.293,3.281,6.225,6.935,8.762,10.857c2.525,3.933,4.643,8.122,6.272,12.474
+			c2.758,7.377,4.154,15.104,4.154,22.993C379.532,459.299,350.103,488.727,313.926,488.727z M416.303,267.718h53.329
+			c6.575,6.575,11.706,14.522,14.941,23.215c2.758,7.366,4.154,15.104,4.154,22.993c0,36.177-29.428,65.606-65.606,65.606
+			c-7.889,0-15.616-1.396-22.982-4.154c-8.727-3.258-16.803-8.471-23.389-15.081L272.454,256l104.32-104.32
+			c6.563-6.586,14.639-11.799,23.354-15.057c7.378-2.758,15.104-4.154,22.993-4.154c36.177,0,65.606,29.44,65.606,65.641
+			c0,7.866-1.385,15.616-4.108,22.97c-3.293,8.751-8.471,16.756-15.092,23.366h-53.225c-6.423,0-11.636,5.213-11.636,11.636
+			C404.666,262.516,409.879,267.718,416.303,267.718z" />
+                        </g>
+                    </g>
+                </svg>
+                <div class="line"></div>
+            </div>
+
+            <section class="bouquet">
+                <h2><span class="accent-word">Букеты</span> на любой вкус</h2>
+                <div class="container">
+                    <div class="item-card">
+                        <a>
+                            <img src="img/bouquet/bouquet-1.jpg" alt="">
+                            Букет «Шелковый путь»
+                        </a>
+                        <span>2 465 руб</span>
+                        <button class="base-button"
+                                @click="
+                                if (cart['bouquet-1']) {
+                                    cart['bouquet-1']['quant'] += 1;
+                                } else {
+                                    cart['bouquet-1'] = {
+                                        name: 'Букет «Шелковый путь»',
+                                        cost: 2465,
+                                        quant: 1,
+                                    };
+                                };
+                                localStorage.setItem('cart', JSON.stringify(cart));
+                                preorderOpen=true;">
+                            Заказать
+                        </button>
+                    </div>
+                    <div class="item-card">
+                        <a>
+                            <img src="img/bouquet/bouquet-2.jpg" alt="">
+                            Букет «Ласковый ветер»
+                        </a>
+                        <span>5 894 руб</span>
+                        <button class="base-button"
+                                @click="
+                                if (cart['bouquet-2']) {
+                                    cart['bouquet-2']['quant'] += 1;
+                                } else {
+                                    cart['bouquet-2'] = {
+                                        name: 'Букет «Ласковый ветер»',
+                                        cost: 5894,
+                                        quant: 1,
+                                    };
+                                };
+                                localStorage.setItem('cart', JSON.stringify(cart));
+                                preorderOpen=true;">
+                            Заказать
+                        </button>
+                    </div>
+                    <div class="item-card">
+                        <a>
+                            <img src="img/bouquet/bouquet-3.jpg" alt="">
+                            Букет «Маленькая сюита»
+                        </a>
+                        <span>2 273 руб</span>
+                        <button class="base-button"
+                                @click="
+                                if (cart['bouquet-3']) {
+                                    cart['bouquet-3']['quant'] += 1;
+                                } else {
+                                    cart['bouquet-3'] = {
+                                        name: 'Букет «Маленькая сюита»',
+                                        cost: 2273,
+                                        quant: 1,
+                                    };
+                                };
+                                localStorage.setItem('cart', JSON.stringify(cart));
+                                preorderOpen=true;">
+                            Заказать
+                        </button>
+                    </div>
+                    <div class="item-card">
+                        <a>
+                            <img src="img/bouquet/bouquet-4.jpg" alt="">
+                            Букет «Летняя фантазия»
+                        </a>
+                        <span>2 279 руб</span>
+                        <button class="base-button"
+                                @click="
+                                if (cart['bouquet-4']) {
+                                    cart['bouquet-4']['quant'] += 1;
+                                } else {
+                                    cart['bouquet-4'] = {
+                                        name: 'Букет «Летняя фантазия»',
+                                        cost: 2279,
+                                        quant: 1,
+                                    };
+                                };
+                                localStorage.setItem('cart', JSON.stringify(cart));
+                                preorderOpen=true;">
+                            Заказать
+                        </button>
+                    </div>
+                    <div class="item-card">
+                        <a>
+                            <img src="img/bouquet/bouquet-5.jpg" alt="">
+                            Букет «Сладкие сны»
+                        </a>
+                        <span>5 103 руб</span>
+                        <button class="base-button"
+                                @click="
+                                if (cart['bouquet-5']) {
+                                    cart['bouquet-5']['quant'] += 1;
+                                } else {
+                                    cart['bouquet-5'] = {
+                                        name: 'Букет «Сладкие сны»',
+                                        cost: 5103,
+                                        quant: 1,
+                                    };
+                                };
+                                localStorage.setItem('cart', JSON.stringify(cart));
+                                preorderOpen=true;">
+                            Заказать
+                        </button>
+                    </div>
+                    <div class="item-card">
+                        <a>
+                            <img src="img/bouquet/bouquet-6.jpg" alt="">
+                            Букет «Полярная звезда»
+                        </a>
+                        <span>2 465 руб</span>
+                        <button class="base-button"
+                                @click="
+                                if (cart['bouquet-6']) {
+                                    cart['bouquet-6']['quant'] += 1;
+                                } else {
+                                    cart['bouquet-6'] = {
+                                        name: 'Букет «Полярная звезда»',
+                                        cost: 2465,
+                                        quant: 1,
+                                    };
+                                };
+                                localStorage.setItem('cart', JSON.stringify(cart));
+                                preorderOpen=true;">
+                            Заказать
+                        </button>
+                    </div>
+                    <div class="item-card">
+                        <a>
+                            <img src="img/roses/roses-3.jpg" alt="">
+                            Букет «Нежная кокетка»
+                        </a>
+                        <span>2 730 руб</span>
+                        <button class="base-button"
+                                @click="
+                                if (cart['bouquet-7']) {
+                                    cart['bouquet-7']['quant'] += 1;
+                                } else {
+                                    cart['bouquet-7'] = {
+                                        name: 'Букет «Нежная кокетка»',
+                                        cost: 2730,
+                                        quant: 1,
+                                    };
+                                };
+                                localStorage.setItem('cart', JSON.stringify(cart));
+                                preorderOpen=true;">
+                            Заказать
+                        </button>
+                    </div>
+                    <a class="see-more" href="bouquet.html">
+                        <svg id="round-text" viewBox="0 0 100 100"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path id="circlePath" fill="none"
+                                  stroke-width="4"
+                                  d="
+                                    M 20, 50
+                                    a 30,30 0 1,1 60,0
+                                    a 30,30 0 1,1 -60,0
+                                  " />
+                            <text id="text" font-family="Comfortaa"
+                                  font-size="12" font-weight="bold"
+                                  fill="var(--brown)">
+                                <textPath id="textPath" href="#circlePath"
+                                          textLength="188">
+                                    Посмотреть всё&nbsp
+                                    Посмотреть всё&nbsp
+                                </textPath>
+                            </text>
+                        </svg>
+                        <svg id="bouquet" version="1.1"
+                             xmlns="http://www.w3.org/2000/svg"
+                             xmlns:xlink="http://www.w3.org/1999/xlink"
+                             viewBox="0 0 408.664 408.664" xml:space="preserve">
+                            <path
+                                  d="M328.758,86.498c-1.897-2.744-3.688-5.338-4.458-7.672c-0.779-2.359-0.862-5.555-0.949-8.938
+	c-0.149-5.768-0.318-12.303-4.111-17.744c-3.549-5.09-9.329-7.523-14.429-9.672c-3.33-1.402-6.475-2.726-8.521-4.51
+	c-1.858-1.621-3.5-4.482-5.237-7.51c-2.762-4.814-5.894-10.273-11.462-13.383c-4.293-2.396-9.187-2.721-13.408-2.721
+	c-1.042,0-2.097,0.022-3.153,0.041c-0.984,0.019-1.971,0.039-2.952,0.039c-2.269,0-4.863-0.094-6.911-0.785
+	c-2.374-0.805-5.001-2.924-7.782-5.17c-4.22-3.408-9.002-7.269-15.129-8.246C229.305,0.078,228.315,0,227.314,0
+	c-4.716,0-9.106,1.637-13.352,3.219c-3.52,1.313-6.846,2.551-9.629,2.551c-2.783,0-6.109-1.238-9.631-2.551
+	C190.457,1.637,186.067,0,181.352,0c-1.002,0-1.991,0.078-2.942,0.228c-6.126,0.979-10.908,4.84-15.127,8.246
+	c-2.781,2.246-5.408,4.365-7.782,5.17c-2.048,0.691-4.644,0.785-6.911,0.785c-0.981,0-1.969-0.02-2.953-0.039
+	c-1.057-0.019-2.111-0.041-3.152-0.041c-4.223,0-9.117,0.324-13.408,2.721c-5.57,3.109-8.702,8.568-11.464,13.385
+	c-1.736,3.027-3.377,5.887-5.234,7.506c-2.046,1.785-5.192,3.109-8.522,4.512c-5.101,2.146-10.882,4.58-14.432,9.672
+	c-3.79,5.439-3.96,11.975-4.109,17.742c-0.088,3.383-0.171,6.578-0.951,8.939c-0.77,2.334-2.561,4.928-4.458,7.674
+	c-3.338,4.83-7.121,10.309-7.121,17.082c0,6.773,3.783,12.25,7.121,17.082c1.897,2.746,3.688,5.34,4.459,7.674
+	c0.779,2.359,0.862,5.555,0.949,8.936c0.149,5.768,0.318,12.305,4.111,17.744c3.151,4.52,8.061,6.944,12.692,8.936
+	c1.91,15.853,10.155,60.743,44.222,108.628c-1.58-0.08-4.052,0.23-6.653,2.257c-6.414,4.996-9.532,17.766-9.532,39.039
+	c0,21.273,3.118,34.043,9.531,39.039c2.378,1.852,4.656,2.272,6.237,2.272c0.287,0,0.551-0.014,0.788-0.035
+	c6.107-0.036,11.757-0.978,16.943-2.512c-5.971,9.364-12.249,21.15-17.569,35.387c-0.928,2.48-0.118,5.277,1.992,6.879
+	l16.514,12.537c1.055,0.799,2.331,1.221,3.628,1.221c0.501,0,1.005-0.063,1.501-0.191c1.776-0.459,3.246-1.705,3.987-3.385
+	c0.051-0.114,1.384-3.124,3.599-7.914c5.03,5.98,13.63,11.49,27.028,11.49c13.398,0,21.997-5.51,27.026-11.491
+	c2.216,4.791,3.55,7.801,3.601,7.915c0.742,1.68,2.211,2.926,3.988,3.385c0.495,0.129,0.999,0.191,1.5,0.191
+	c1.297,0,2.574-0.422,3.628-1.223l16.512-12.535c2.11-1.602,2.92-4.398,1.992-6.879c-5.319-14.235-11.598-26.021-17.567-35.385
+	c5.186,1.532,10.835,2.474,16.941,2.51c0.237,0.021,0.501,0.035,0.788,0.035c1.581,0,3.86-0.422,6.237-2.272
+	c6.413-4.996,9.531-17.766,9.531-39.039c0-21.273-3.118-34.043-9.532-39.039c-2.6-2.024-5.068-2.333-6.648-2.257
+	c33.507-47.039,42.058-90.892,44.199-108.452c0.007-0.058,0.007-0.115,0.013-0.172c4.632-1.991,9.544-4.416,12.698-8.938
+	c3.79-5.439,3.96-11.977,4.109-17.742c0.088-3.383,0.171-6.578,0.95-8.939c0.771-2.332,2.563-4.926,4.459-7.672
+	c3.338-4.832,7.121-10.309,7.121-17.084C335.88,96.809,332.097,91.33,328.758,86.498z M300.152,53.533
+	c3.95,1.662,7.681,3.234,9.243,5.475c1.733,2.486,1.843,6.715,1.959,11.191c0.01,0.392,0.021,0.785,0.032,1.178
+	c-5.444-2.113-11.476-3.09-17.939-2.842c-2.064,0.078-4.126,0.297-6.17,0.621c1.201-1.589,2.238-3.318,3.078-5.178
+	c1.975-4.369,2.927-9.023,2.85-13.678C295.464,51.547,297.829,52.554,300.152,53.533z M212.765,295.662
+	c-1.387-0.329-2.826-0.522-4.313-0.522h-8.242c-1.485,0-2.925,0.192-4.312,0.521c-6.861-7.275-17.939-16.476-32.827-20.719
+	c-31.663-40.505-43.163-79.861-47.286-101.342c0.605,0.983,1.209,2.033,1.825,3.106c2.764,4.816,5.896,10.275,11.465,13.385
+	c4.292,2.398,9.187,2.721,13.409,2.721c1.041,0,2.096-0.02,3.152-0.041c0.984-0.02,1.972-0.039,2.953-0.039
+	c2.268,0,4.863,0.094,6.911,0.787c2.375,0.803,5.002,2.924,7.783,5.17c4.219,3.406,9.001,7.266,15.127,8.244
+	c0.95,0.152,1.94,0.229,2.942,0.229c4.716,0,9.105-1.635,13.351-3.217c3.52-1.313,6.847-2.553,9.629-2.553
+	c2.782,0,6.108,1.24,9.629,2.553c4.245,1.582,8.635,3.217,13.35,3.217c1.003,0,1.994-0.076,2.943-0.229
+	c6.127-0.979,10.909-4.84,15.129-8.246c2.78-2.244,5.407-4.365,7.782-5.168c2.048-0.693,4.643-0.787,6.912-0.787
+	c0.98,0,1.967,0.02,2.95,0.039c1.057,0.021,2.109,0.041,3.15,0.041c4.223,0,9.117-0.324,13.409-2.721
+	c5.57-3.109,8.701-8.566,11.463-13.381c0.604-1.054,1.198-2.084,1.793-3.052c-4.073,20.846-15.579,60.755-47.249,101.281
+	C230.704,279.184,219.625,288.385,212.765,295.662z M215.189,313.877c0,3.715-3.021,6.736-6.736,6.736h-8.242
+	c-3.713,0-6.734-3.022-6.734-6.736c0-3.715,3.021-6.736,6.734-6.736h8.242C212.167,307.141,215.189,310.162,215.189,313.877z
+	 M192.701,30.033c-7.855-7.193-20.098-6.654-27.291,1.199c-2.238,2.443-2.071,6.24,0.373,8.477c2.443,2.238,6.238,2.072,8.477-0.373
+	c2.725-2.973,7.362-3.18,10.337-0.453c4.328,3.963,4.624,10.711,0.659,15.041c-5.513,6.018-14.896,6.434-20.917,0.918
+	c-3.942-3.609-6.242-8.539-6.478-13.877c-0.234-5.34,1.624-10.449,5.234-14.391c9.873-10.779,26.675-11.519,37.454-1.646
+	c7.306,6.691,16.696,22.045,15.311,38.923c-1.137-0.358-2.3-0.669-3.489-0.921c-6.6-1.398-13.173-1.242-19.345,0.204
+	c0.367-0.357,0.729-0.725,1.078-1.106C202.538,52.818,201.908,38.467,192.701,30.033z M252.995,118.303
+	c-6.3-1.019-12.645-0.468-18.574,1.574c3.079-3.707,5.333-8.186,6.399-13.217c0.469-2.212,0.716-4.42,0.777-6.604
+	c2.714,1.883,5.611,3.495,8.661,4.806C250.195,109.453,251.113,114.047,252.995,118.303z M279.075,173.425
+	c-1.642,2.722-3.314,5.061-5.337,6.19c-1.89,1.055-4.882,1.197-7.56,1.197c-0.964,0-1.939-0.02-2.917-0.039
+	c-1.061-0.02-2.126-0.041-3.184-0.041c-1.202,0-2.483,0.024-3.808,0.117c4.587-3.701,7.996-8.922,9.349-15.115
+	c1.29-5.91,0.201-11.967-3.066-17.059c-3.268-5.09-8.322-8.604-14.231-9.893c-10.4-2.273-20.718,4.348-22.989,14.752
+	c-0.706,3.238,1.346,6.436,4.583,7.143c3.235,0.699,6.434-1.346,7.142-4.584c0.86-3.939,4.77-6.449,8.707-5.586
+	c2.778,0.605,5.154,2.258,6.69,4.65c1.535,2.393,2.047,5.24,1.44,8.018c-1.74,7.977-9.646,13.057-17.622,11.309
+	c-10.778-2.352-17.634-13.035-15.282-23.814c1.51-6.918,5.623-12.834,11.582-16.658c5.96-3.822,13.047-5.1,19.97-3.588
+	C270.62,134.369,282.886,154.361,279.075,173.425z M195.88,168.119c-7.5-5.723-18.258-4.275-23.979,3.227
+	c-2.01,2.635-1.503,6.4,1.132,8.41c2.635,2.01,6.399,1.502,8.409-1.133c1.709-2.24,4.923-2.668,7.16-0.965
+	c3.457,2.639,4.124,7.598,1.489,11.055c-3.8,4.979-10.939,5.938-15.92,2.143c-6.881-5.25-8.209-15.117-2.959-22
+	c3.42-4.486,8.383-7.371,13.974-8.123c5.596-0.75,11.141,0.719,15.626,4.139c5.899,4.5,10.032,10.771,10.835,25.626
+	c-2.351-0.65-4.802-1.105-7.314-1.105c-0.479,0-0.956,0.029-1.431,0.061C205.105,181.801,202.581,173.232,195.88,168.119z
+	 M223.77,194.602c-0.057-4.801-0.393-9.142-1.031-13.075c3.243,2.178,6.934,3.8,10.976,4.682c1.918,0.418,3.833,0.619,5.72,0.619
+	c0.575,0,1.146-0.037,1.715-0.074c-1.125,0.846-2.222,1.725-3.303,2.598c-3.35,2.703-6.514,5.258-9.482,5.732
+	c-0.326,0.051-0.681,0.078-1.053,0.078C226.237,195.162,225.042,194.942,223.77,194.602z M209.887,74.67
+	c13.426,2.842,22.036,16.078,19.194,29.504c-2.141,10.094-12.089,16.564-22.186,14.43c-3.597-0.762-6.682-2.879-8.687-5.963
+	c-2.005-3.082-2.689-6.762-1.927-10.361c0.543-2.564,2.052-4.764,4.249-6.193c2.196-1.428,4.818-1.92,7.383-1.373
+	c3.246,0.686,6.427-1.385,7.114-4.625c0.687-3.242-1.385-6.428-4.626-7.115c-5.699-1.203-11.531-0.121-16.415,3.055
+	c-4.884,3.178-8.238,8.066-9.445,13.766c-1.427,6.734-0.146,13.621,3.607,19.391c3.753,5.77,9.527,9.732,16.26,11.16
+	c4.943,1.047,9.862,0.828,14.43-0.424c-4.748,5.026-8.06,11.263-9.572,18.191c-0.186,0.854-0.326,1.705-0.44,2.555
+	c-13.186-3.629-24.341-11.142-31.209-21.219c-6.231-9.141-8.5-19.664-6.39-29.629C174.952,82.227,192.295,70.939,209.887,74.67z
+	 M180.173,149.483c-1.393,0.336-2.751,0.763-4.074,1.269c-0.196-1.898-0.5-3.787-0.905-5.656
+	C176.766,146.635,178.427,148.099,180.173,149.483z M158.497,108.866c0.114,3.291,0.567,6.572,1.35,9.81
+	c-3.11-2.541-6.559-4.531-10.229-5.934C152.731,111.719,155.707,110.42,158.497,108.866z M135.203,122.324
+	c6.735-0.297,13.201,2.051,18.179,6.611c7.372,6.752,11.747,18.799,10.876,29.647c-0.912,0.942-1.781,1.937-2.588,2.995
+	c-4.471,5.861-6.23,12.948-5.496,19.756c-2.65-0.507-5.264-0.602-7.584-0.602c-1.059,0-2.124,0.021-3.186,0.041
+	c-0.979,0.02-1.955,0.039-2.919,0.039c-2.678,0-5.669-0.143-7.559-1.197c-2.121-1.184-3.858-3.704-5.578-6.597
+	c6.695-0.266,13.287-3.089,18.157-8.407c3.973-4.336,6.018-9.959,5.76-15.834c-0.259-5.873-2.789-11.295-7.125-15.266
+	c-3.705-3.395-8.501-5.129-13.53-4.922c-5.019,0.221-9.652,2.383-13.046,6.088c-2.238,2.443-2.072,6.238,0.371,8.477
+	c2.443,2.24,6.239,2.072,8.477-0.371c2.538-2.77,6.855-2.959,9.623-0.422c1.973,1.807,3.124,4.271,3.241,6.943
+	c0.118,2.672-0.813,5.23-2.619,7.201c-5.22,5.699-14.104,6.09-19.803,0.873c-3.747-3.432-5.933-8.117-6.156-13.193
+	c-0.223-5.074,1.544-9.934,4.975-13.682C122.231,125.525,128.458,122.621,135.203,122.324z M258.636,83.701
+	c-2.525,2.759-4.47,5.846-5.851,9.109c-7.789-3.969-14.112-10.639-17.771-18.93c-4.189-9.492-4.432-19.721-0.663-28.062
+	c2.913-6.453,8.166-11.387,14.79-13.889c6.624-2.502,13.825-2.277,20.279,0.639c4.871,2.201,8.595,6.166,10.483,11.164
+	c1.889,5,1.717,10.436-0.484,15.307c-1.627,3.605-4.561,6.359-8.26,7.756c-3.7,1.396-7.722,1.271-11.328-0.357
+	c-2.591-1.17-4.571-3.279-5.576-5.938c-1.004-2.66-0.913-5.553,0.257-8.145c1.66-3.676,6.004-5.316,9.68-3.656
+	c3.023,1.367,6.574,0.021,7.938-2.998c1.364-3.021,0.021-6.574-2.998-7.938c-4.703-2.125-9.951-2.289-14.776-0.467
+	c-4.827,1.822-8.655,5.416-10.779,10.119c-2.489,5.514-2.683,11.666-0.546,17.324c2.138,5.658,6.351,10.145,11.863,12.633
+	c2.625,1.187,5.373,1.925,8.156,2.229C261.455,80.883,259.969,82.246,258.636,83.701z M218.152,14.463
+	c3.398-1.266,6.608-2.463,9.161-2.463c0.371,0,0.725,0.027,1.051,0.078c2.967,0.475,6.131,3.027,9.479,5.732
+	c1.597,1.289,3.222,2.592,4.935,3.774c-8.173,3.646-14.729,9.931-18.725,17.964c-3.412-9.073-8.669-16.92-14.283-22.414
+	C212.73,16.484,215.55,15.434,218.152,14.463z M134.927,27.547c1.889-1.055,4.88-1.197,7.558-1.197c0.964,0,1.94,0.02,2.919,0.039
+	c1.063,0.021,2.127,0.041,3.186,0.041c0.098,0,0.201-0.002,0.3-0.002c-2.198,4.645-3.249,9.783-3.017,15.064
+	c0.376,8.541,4.055,16.424,10.361,22.199c5.788,5.303,13.294,7.577,20.556,6.912c-7.198,5.267-12.845,12.688-15.868,21.557
+	c-0.303,0.207-0.596,0.438-0.864,0.707c-13.693,13.691-40.105,14.152-53.324,0.935c-5.007-5.006-7.764-11.662-7.764-18.744
+	s2.758-13.738,7.764-18.744c7.803-7.801,20.497-7.801,28.298-0.002c5.771,5.773,5.771,15.166,0.002,20.939
+	c-4.152,4.148-10.907,4.146-15.058,0c-2.852-2.852-2.852-7.494,0.001-10.348c2.343-2.344,2.342-6.143-0.001-8.484
+	c-2.345-2.344-6.145-2.342-8.485,0c-7.53,7.533-7.529,19.787,0.002,27.318c8.828,8.826,23.195,8.824,32.025-0.002
+	c10.449-10.451,10.449-27.457-0.001-37.908c-4.799-4.799-10.757-7.744-16.979-8.852c0.506-0.849,0.998-1.702,1.484-2.55
+	C130.201,32.625,132.26,29.037,134.927,27.547z M99.269,148.154c-1.733-2.486-1.843-6.715-1.959-11.191
+	c-0.105-4.104-0.216-8.348-1.551-12.389c-1.311-3.971-3.685-7.408-5.98-10.731c-2.568-3.719-4.994-7.229-4.994-10.262
+	c0-3.033,2.426-6.545,4.994-10.262c0.341-0.493,0.682-0.99,1.021-1.488c1.854,3.827,4.353,7.36,7.449,10.457
+	c5.729,5.729,13.293,9.766,21.735,11.766c-4.158,2.027-7.943,4.832-11.162,8.346c-5.596,6.111-8.478,14.035-8.113,22.313
+	c0.082,1.852,0.332,3.668,0.727,5.439C100.533,149.539,99.777,148.885,99.269,148.154z M142.153,313.877
+	c0-22.049,3.57-28.002,4.622-29.275c17.629,0.155,30.855,9.736,38.781,17.635c-2.547,3.2-4.081,7.242-4.081,11.641
+	c0,4.398,1.534,8.44,4.08,11.64c-0.054,0.054-1.186,1.102-2.138,2.044c-8.072,7.416-20.516,15.449-36.648,15.592
+	C145.708,341.889,142.153,336.006,142.153,313.877z M165.852,393.334l-6.919-5.252c11.848-29.472,27.933-46.995,33.015-52.061
+	c0.703-0.656,1.376-1.306,2.021-1.946c0.01-0.011,0.021-0.02,0.03-0.031c0.665-0.662,1.297-1.314,1.898-1.951
+	c0.691,0.164,1.393,0.295,2.109,0.38C185.734,351.048,171.924,380.112,165.852,393.334z M225.018,384.578
+	c-0.934,2.711-5.278,12.086-20.685,12.086c-15.48,0-19.794-9.463-20.686-12.072c0.002-0.286,0.01-0.561,0.013-0.844
+	c5.813-12.002,13.413-26.917,20.671-38.835c7.258,11.916,14.859,26.833,20.675,38.837
+	C225.009,384.027,225.016,384.298,225.018,384.578z M249.731,388.082l-6.918,5.252c-6.073-13.221-19.886-42.284-32.158-60.862
+	c0.718-0.084,1.419-0.216,2.11-0.379c1.204,1.277,2.534,2.612,3.996,3.972C221.89,341.185,237.917,358.692,249.731,388.082z
+	 M266.511,313.877c0,22.049-3.57,28.002-4.622,29.275c-16.12-0.142-28.554-8.162-36.624-15.573c-0.97-0.961-2.106-2.012-2.157-2.061
+	c2.547-3.201,4.081-7.242,4.081-11.641c0-4.398-1.534-8.44-4.082-11.641c7.925-7.898,21.15-17.479,38.782-17.635
+	C262.94,285.875,266.511,291.828,266.511,313.877z M318.886,113.846c-2.296,3.322-4.669,6.758-5.98,10.729
+	c-1.335,4.043-1.445,8.287-1.552,12.393c-0.116,4.477-0.226,8.705-1.957,11.189c-1.565,2.242-5.295,3.813-9.245,5.477
+	c-3.08,1.297-6.237,2.631-9.111,4.53c-1.054-6.191-3.263-12.248-6.558-17.741c-0.967-1.613-2.015-3.143-3.122-4.605
+	c6.349-0.623,12.5-3.493,17.138-8.558c4.085-4.461,6.189-10.244,5.924-16.287c-0.266-6.045-2.869-11.621-7.33-15.707
+	c-7.854-7.193-20.098-6.654-27.291,1.201c-2.238,2.443-2.071,6.238,0.373,8.477c2.443,2.238,6.238,2.072,8.477-0.373
+	c1.32-1.441,3.122-2.283,5.074-2.367c1.968-0.09,3.822,0.594,5.264,1.912c2.097,1.92,3.32,4.543,3.444,7.383
+	c0.125,2.842-0.863,5.561-2.784,7.658c-5.514,6.02-14.897,6.43-20.918,0.92c-8.137-7.451-8.694-20.133-1.244-28.27
+	c5.923-6.469,16.293-10.895,26.417-11.279c5.888-0.217,14.261,0.835,21.216,6.949c1.144,2.033,2.464,3.959,3.766,5.844
+	c2.569,3.717,4.995,7.229,4.995,10.262C323.88,106.615,321.454,110.127,318.886,113.846z" />
+                        </svg>
+                    </a>
+                </div>
+            </section>
+
+            <div id="pre-about" class="separator">
+                <div class="line"></div>
+                <svg version="1.1" id="Layer_1"
+                     xmlns="http://www.w3.org/2000/svg"
+                     xmlns:xlink="http://www.w3.org/1999/xlink"
+                     viewBox="0 0 512 512" xml:space="preserve">
+                    <g>
+                        <g>
+                            <path d="M490.519,256.023c6.807-7.913,12.218-17.001,15.907-26.81c3.7-10.007,5.574-20.468,5.574-31.104
+			c0-49.024-39.866-88.913-88.879-88.913c-7.971,0-15.837,1.059-23.471,3.153c2.095-7.633,3.153-15.488,3.153-23.471
+			C402.804,39.866,362.915,0,313.891,0c-10.624,0-21.097,1.873-31.162,5.597c-9.763,3.665-18.839,9.076-26.752,15.884
+			c-7.901-6.819-16.989-12.207-26.764-15.86C219.229,1.897,208.756,0,198.074,0c-49.012,0-88.879,39.866-88.879,88.879
+			c0,7.983,1.059,15.837,3.154,23.471c-7.633-2.095-15.5-3.154-23.471-3.154C39.866,109.196,0,149.062,0,198.074
+			c0,10.682,1.897,21.155,5.62,31.127c3.654,9.786,9.053,18.874,15.86,26.775c-6.807,7.913-12.218,17.001-15.907,26.81
+			C1.873,292.794,0,303.255,0,313.891c0,49.024,39.866,88.913,88.879,88.913c7.971,0,15.837-1.059,23.471-3.153
+			c-2.095,7.633-3.154,15.488-3.154,23.471c0,49.012,39.889,88.879,88.913,88.879c10.624,0,21.097-1.873,31.162-5.597
+			c9.763-3.665,18.839-9.076,26.752-15.884c7.901,6.819,16.989,12.206,26.764,15.86c9.984,3.724,20.457,5.62,31.139,5.62
+			c49.012,0,88.879-39.866,88.879-88.879c0-7.982-1.059-15.837-3.153-23.471c7.633,2.095,15.5,3.153,23.471,3.153
+			c49.012,0,88.879-39.866,88.879-88.879c0-10.682-1.897-21.155-5.62-31.127C502.737,273.012,497.327,263.924,490.519,256.023z
+			 M198.074,23.273c7.889,0,15.628,1.396,23.005,4.154c8.739,3.258,16.721,8.425,23.319,15.046v53.341
+			c0,6.423,5.213,11.636,11.636,11.636c6.423,0,11.636-5.213,11.636-11.636V42.368c6.598-6.575,14.545-11.718,23.191-14.964
+			c7.412-2.746,15.162-4.131,23.028-4.131c36.201,0,65.641,29.428,65.641,65.606c0,7.889-1.396,15.616-4.154,22.982
+			c-3.258,8.716-8.46,16.78-15.046,23.354c-0.012,0.012-0.023,0.023-0.035,0.035L256,239.546l-104.32-104.32
+			c-6.586-6.563-11.799-14.639-15.057-23.354c-2.758-7.377-4.154-15.104-4.154-22.993C132.468,52.701,161.897,23.273,198.074,23.273
+			z M111.872,375.377c-7.377,2.758-15.104,4.154-22.993,4.154c-36.177,0-65.606-29.44-65.606-65.641
+			c0-7.866,1.385-15.616,4.108-22.97c3.258-8.669,8.39-16.617,14.929-23.203h53.457c6.423,0,11.636-5.201,11.636-11.636
+			c0-6.423-5.213-11.636-11.636-11.636H42.531c-6.656-6.598-11.834-14.604-15.104-23.377c-2.758-7.366-4.154-15.104-4.154-22.993
+			c0-36.177,29.428-65.606,65.606-65.606c7.889,0,15.616,1.396,22.993,4.154c8.716,3.258,16.791,8.471,23.377,15.081L239.546,256
+			l-104.32,104.32C128.663,366.906,120.588,372.119,111.872,375.377z M313.926,488.727c-7.889,0-15.628-1.396-23.005-4.154
+			c-8.704-3.247-16.663-8.39-23.249-14.988v-53.236c0-6.423-5.213-11.636-11.636-11.636c-6.423,0-11.636,5.213-11.636,11.636v53.225
+			c-6.609,6.598-14.58,11.764-23.261,15.023c-7.412,2.746-15.162,4.131-23.028,4.131c-36.201,0-65.641-29.428-65.641-65.606
+			c0-7.889,1.396-15.616,4.154-22.982c3.258-8.716,8.46-16.78,15.046-23.354L256,272.454l104.285,104.285
+			c0.012,0.023,0.035,0.035,0.058,0.058c3.293,3.281,6.225,6.935,8.762,10.857c2.525,3.933,4.643,8.122,6.272,12.474
+			c2.758,7.377,4.154,15.104,4.154,22.993C379.532,459.299,350.103,488.727,313.926,488.727z M416.303,267.718h53.329
+			c6.575,6.575,11.706,14.522,14.941,23.215c2.758,7.366,4.154,15.104,4.154,22.993c0,36.177-29.428,65.606-65.606,65.606
+			c-7.889,0-15.616-1.396-22.982-4.154c-8.727-3.258-16.803-8.471-23.389-15.081L272.454,256l104.32-104.32
+			c6.563-6.586,14.639-11.799,23.354-15.057c7.378-2.758,15.104-4.154,22.993-4.154c36.177,0,65.606,29.44,65.606,65.641
+			c0,7.866-1.385,15.616-4.108,22.97c-3.293,8.751-8.471,16.756-15.092,23.366h-53.225c-6.423,0-11.636,5.213-11.636,11.636
+			C404.666,262.516,409.879,267.718,416.303,267.718z" />
+                        </g>
+                    </g>
+                </svg>
+                <div class="line"></div>
+            </div>
+
+            <section class="about-us">
+                <h2>Почему <span class="accent-word">мы</span>?</h2>
+                <div class="container">
+                    <input type="radio" name="about" id="about" checked>
+                    <label for="about">О нас</label>
+                    <div class="about">
+                        <h3>Цветочная мастерская КЛЕВЕР — это</h3>
+                        <ul>
+                            <li>Только отборные и всегда свежие цветы;</li>
+                            <li>Оригинальная подача эксклюзивных букетов;</li>
+                            <li>Шляпная коробка — идеальная замена классической
+                                вазе;</li>
+                            <li>Собранная вручную упаковка;</li>
+                            <li>Индивидуальное брендирование флористической
+                                упаковки для частных клиентов;</li>
+                            <li>Широкие возможности для корпоративных клиентов
+                                (брэндинг, система скидок).</li>
+                        </ul>
+                        <a href="about-us.html" class="base-button"
+                           data-type='white'>
+                            Подробнее о нас
+                        </a>
+                    </div>
+                    <input type="radio" name="about" id="delivery">
+                    <label for="delivery">Доставка</label>
+                    <div class="delivery">
+                        <h3>Круглосуточная доставка по всей Уфе</h3>
+                        <p>
+                            Одна из наших ключевых задач - круглосуточная,
+                            бережная и своевременная доставка букетов для ваших
+                            близких и родных! Курьер привезет ваши цветы в любое
+                            время дня и ночи. Если вы хотите получить свой заказ
+                            в промежутке с 22:00 до 9:00, свяжитесь с нами по
+                            телефону 8 (800) 555-35-35. Оператор обговорит с
+                            Вами детали доставки цветов ночью и оформит покупку.
+                            В вечернее время (с 22:00 до 9:00) - взымается
+                            дополнительная плата. Стоимость в ночное время с
+                            00:05 и до 6:55 стоит уточнить у оператора.
+                        </p>
+                        <a href="delivery.html" class="base-button"
+                           data-type='white'>
+                            Подробнее о доставке
+                        </a>
+                    </div>
+                    <input type="radio" name="about" id="warranty">
+                    <label for="warranty">Гарантии</label>
+                    <div class="warranty">
+                        <h3>Самые свежие цветы</h3>
+                        <p>
+                            Лучшие флористы в Уфе соберут для вас авторские
+                            букеты из самых свежих цветов. Благодаря прямым
+                            поставкам с плантаций Голландии, Эквадора и России,
+                            мы можем гарантировать вам 100% свежесть каждого
+                            букета, а также сохранять приятные цены. Если у вас
+                            возникли вопросы к качеству композиции, свяжитесь с
+                            нами в течение 24 часов, и мы заменим её на новую.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <div id="post-about" class="separator">
+                <div class="line"></div>
+                <svg version="1.1" id="Layer_1"
+                     xmlns="http://www.w3.org/2000/svg"
+                     xmlns:xlink="http://www.w3.org/1999/xlink"
+                     viewBox="0 0 512 512" xml:space="preserve">
+                    <g>
+                        <g>
+                            <path d="M490.519,256.023c6.807-7.913,12.218-17.001,15.907-26.81c3.7-10.007,5.574-20.468,5.574-31.104
+			c0-49.024-39.866-88.913-88.879-88.913c-7.971,0-15.837,1.059-23.471,3.153c2.095-7.633,3.153-15.488,3.153-23.471
+			C402.804,39.866,362.915,0,313.891,0c-10.624,0-21.097,1.873-31.162,5.597c-9.763,3.665-18.839,9.076-26.752,15.884
+			c-7.901-6.819-16.989-12.207-26.764-15.86C219.229,1.897,208.756,0,198.074,0c-49.012,0-88.879,39.866-88.879,88.879
+			c0,7.983,1.059,15.837,3.154,23.471c-7.633-2.095-15.5-3.154-23.471-3.154C39.866,109.196,0,149.062,0,198.074
+			c0,10.682,1.897,21.155,5.62,31.127c3.654,9.786,9.053,18.874,15.86,26.775c-6.807,7.913-12.218,17.001-15.907,26.81
+			C1.873,292.794,0,303.255,0,313.891c0,49.024,39.866,88.913,88.879,88.913c7.971,0,15.837-1.059,23.471-3.153
+			c-2.095,7.633-3.154,15.488-3.154,23.471c0,49.012,39.889,88.879,88.913,88.879c10.624,0,21.097-1.873,31.162-5.597
+			c9.763-3.665,18.839-9.076,26.752-15.884c7.901,6.819,16.989,12.206,26.764,15.86c9.984,3.724,20.457,5.62,31.139,5.62
+			c49.012,0,88.879-39.866,88.879-88.879c0-7.982-1.059-15.837-3.153-23.471c7.633,2.095,15.5,3.153,23.471,3.153
+			c49.012,0,88.879-39.866,88.879-88.879c0-10.682-1.897-21.155-5.62-31.127C502.737,273.012,497.327,263.924,490.519,256.023z
+			 M198.074,23.273c7.889,0,15.628,1.396,23.005,4.154c8.739,3.258,16.721,8.425,23.319,15.046v53.341
+			c0,6.423,5.213,11.636,11.636,11.636c6.423,0,11.636-5.213,11.636-11.636V42.368c6.598-6.575,14.545-11.718,23.191-14.964
+			c7.412-2.746,15.162-4.131,23.028-4.131c36.201,0,65.641,29.428,65.641,65.606c0,7.889-1.396,15.616-4.154,22.982
+			c-3.258,8.716-8.46,16.78-15.046,23.354c-0.012,0.012-0.023,0.023-0.035,0.035L256,239.546l-104.32-104.32
+			c-6.586-6.563-11.799-14.639-15.057-23.354c-2.758-7.377-4.154-15.104-4.154-22.993C132.468,52.701,161.897,23.273,198.074,23.273
+			z M111.872,375.377c-7.377,2.758-15.104,4.154-22.993,4.154c-36.177,0-65.606-29.44-65.606-65.641
+			c0-7.866,1.385-15.616,4.108-22.97c3.258-8.669,8.39-16.617,14.929-23.203h53.457c6.423,0,11.636-5.201,11.636-11.636
+			c0-6.423-5.213-11.636-11.636-11.636H42.531c-6.656-6.598-11.834-14.604-15.104-23.377c-2.758-7.366-4.154-15.104-4.154-22.993
+			c0-36.177,29.428-65.606,65.606-65.606c7.889,0,15.616,1.396,22.993,4.154c8.716,3.258,16.791,8.471,23.377,15.081L239.546,256
+			l-104.32,104.32C128.663,366.906,120.588,372.119,111.872,375.377z M313.926,488.727c-7.889,0-15.628-1.396-23.005-4.154
+			c-8.704-3.247-16.663-8.39-23.249-14.988v-53.236c0-6.423-5.213-11.636-11.636-11.636c-6.423,0-11.636,5.213-11.636,11.636v53.225
+			c-6.609,6.598-14.58,11.764-23.261,15.023c-7.412,2.746-15.162,4.131-23.028,4.131c-36.201,0-65.641-29.428-65.641-65.606
+			c0-7.889,1.396-15.616,4.154-22.982c3.258-8.716,8.46-16.78,15.046-23.354L256,272.454l104.285,104.285
+			c0.012,0.023,0.035,0.035,0.058,0.058c3.293,3.281,6.225,6.935,8.762,10.857c2.525,3.933,4.643,8.122,6.272,12.474
+			c2.758,7.377,4.154,15.104,4.154,22.993C379.532,459.299,350.103,488.727,313.926,488.727z M416.303,267.718h53.329
+			c6.575,6.575,11.706,14.522,14.941,23.215c2.758,7.366,4.154,15.104,4.154,22.993c0,36.177-29.428,65.606-65.606,65.606
+			c-7.889,0-15.616-1.396-22.982-4.154c-8.727-3.258-16.803-8.471-23.389-15.081L272.454,256l104.32-104.32
+			c6.563-6.586,14.639-11.799,23.354-15.057c7.378-2.758,15.104-4.154,22.993-4.154c36.177,0,65.606,29.44,65.606,65.641
+			c0,7.866-1.385,15.616-4.108,22.97c-3.293,8.751-8.471,16.756-15.092,23.366h-53.225c-6.423,0-11.636,5.213-11.636,11.636
+			C404.666,262.516,409.879,267.718,416.303,267.718z" />
+                        </g>
+                    </g>
+                </svg>
+                <div class="line"></div>
+            </div>
+
+            <section class="reviews">
+                <h2><span class="accent-word">Отзывы</span> наших клиентов</h2>
+                <div class="container">
+                    <div class="review-card">
+                        <span class="name">Алина</span>
+                        <span class="date">12.05.2024</span>
+                        <div class="stars">★★★★★</div>
+                        <p>
+                            Доставили ровно ко времени заказывали два
+                            букета: «комплимент Королеве» даже красивее чем на
+                            сайте получился,такой пышный. очень шикарный! своих
+                            денег определенно стоит.
+                        </p>
+                    </div>
+                    <div class="review-card">
+                        <span class="name">Зайтуна</span>
+                        <span class="date">06.05.2024</span>
+                        <div class="stars">★★★★★</div>
+                        <p>
+                            отличный яркий букет! и доставка вовремя! спасибо!!
+                        </p>
+                    </div>
+                    <div class="review-card">
+                        <span class="name">Gulnara</span>
+                        <span class="date">24.04.2024</span>
+                        <div class="stars">★★★★★</div>
+                        <p>
+                            Ребята, вы Молодцы! Оформила заказ в 12.50,
+                            доставили в 15.50. Букет шикарный, оформление супер!
+                            Беру на заметку ваш сервис, приятно иметь дело с
+                            ответственными людьми.
+                        </p>
+                    </div>
+                    <div class="review-card">
+                        <span class="name">Вячеслав</span>
+                        <span class="date">20.04.2024</span>
+                        <div class="stars">★★★★★</div>
+                        <p>
+                            Прекрасный букет. Заказывал на день рождения Жены.
+                            Все вовремя и отличного качества, соответствие фото
+                            с сайта 100%
+                        </p>
+                    </div>
+                    <div class="review-card">
+                        <span class="name">Эльмира</span>
+                        <span class="date">18.04.2024</span>
+                        <div class="stars">★★★★★</div>
+                        <p>
+                            Благодарю всю команду за отличное обслуживание,
+                            удобный сайт заказа, спасибо флористу за прекрасный
+                            букет, за оперативную доставку, очень
+                            приятно, спасибо большое.
+                        </p>
+                    </div>
+                    <div class="review-card">
+                        <span class="name">Любовь</span>
+                        <span class="date">15.04.2024</span>
+                        <div class="stars">★★★★★</div>
+                        <p>
+                            Очень благодарна флористам магазина за красивый
+                            букет к подарку на день рождения. Не первый раз
+                            пользуюсь услугами этого салона. Успехов и
+                            процветания Вам в создании хорошего настроения людям
+                            в праздники и не только!
+                        </p>
+                    </div>
+                    <a href="reviews.html" class="base-button">Смотреть все
+                        отзывы</a>
+                </div>
+            </section>
+
+            <div class="separator">
+                <div class="line"></div>
+                <svg version="1.1" id="Layer_1"
+                     xmlns="http://www.w3.org/2000/svg"
+                     xmlns:xlink="http://www.w3.org/1999/xlink"
+                     viewBox="0 0 512 512" xml:space="preserve">
+                    <g>
+                        <g>
+                            <path d="M490.519,256.023c6.807-7.913,12.218-17.001,15.907-26.81c3.7-10.007,5.574-20.468,5.574-31.104
+			c0-49.024-39.866-88.913-88.879-88.913c-7.971,0-15.837,1.059-23.471,3.153c2.095-7.633,3.153-15.488,3.153-23.471
+			C402.804,39.866,362.915,0,313.891,0c-10.624,0-21.097,1.873-31.162,5.597c-9.763,3.665-18.839,9.076-26.752,15.884
+			c-7.901-6.819-16.989-12.207-26.764-15.86C219.229,1.897,208.756,0,198.074,0c-49.012,0-88.879,39.866-88.879,88.879
+			c0,7.983,1.059,15.837,3.154,23.471c-7.633-2.095-15.5-3.154-23.471-3.154C39.866,109.196,0,149.062,0,198.074
+			c0,10.682,1.897,21.155,5.62,31.127c3.654,9.786,9.053,18.874,15.86,26.775c-6.807,7.913-12.218,17.001-15.907,26.81
+			C1.873,292.794,0,303.255,0,313.891c0,49.024,39.866,88.913,88.879,88.913c7.971,0,15.837-1.059,23.471-3.153
+			c-2.095,7.633-3.154,15.488-3.154,23.471c0,49.012,39.889,88.879,88.913,88.879c10.624,0,21.097-1.873,31.162-5.597
+			c9.763-3.665,18.839-9.076,26.752-15.884c7.901,6.819,16.989,12.206,26.764,15.86c9.984,3.724,20.457,5.62,31.139,5.62
+			c49.012,0,88.879-39.866,88.879-88.879c0-7.982-1.059-15.837-3.153-23.471c7.633,2.095,15.5,3.153,23.471,3.153
+			c49.012,0,88.879-39.866,88.879-88.879c0-10.682-1.897-21.155-5.62-31.127C502.737,273.012,497.327,263.924,490.519,256.023z
+			 M198.074,23.273c7.889,0,15.628,1.396,23.005,4.154c8.739,3.258,16.721,8.425,23.319,15.046v53.341
+			c0,6.423,5.213,11.636,11.636,11.636c6.423,0,11.636-5.213,11.636-11.636V42.368c6.598-6.575,14.545-11.718,23.191-14.964
+			c7.412-2.746,15.162-4.131,23.028-4.131c36.201,0,65.641,29.428,65.641,65.606c0,7.889-1.396,15.616-4.154,22.982
+			c-3.258,8.716-8.46,16.78-15.046,23.354c-0.012,0.012-0.023,0.023-0.035,0.035L256,239.546l-104.32-104.32
+			c-6.586-6.563-11.799-14.639-15.057-23.354c-2.758-7.377-4.154-15.104-4.154-22.993C132.468,52.701,161.897,23.273,198.074,23.273
+			z M111.872,375.377c-7.377,2.758-15.104,4.154-22.993,4.154c-36.177,0-65.606-29.44-65.606-65.641
+			c0-7.866,1.385-15.616,4.108-22.97c3.258-8.669,8.39-16.617,14.929-23.203h53.457c6.423,0,11.636-5.201,11.636-11.636
+			c0-6.423-5.213-11.636-11.636-11.636H42.531c-6.656-6.598-11.834-14.604-15.104-23.377c-2.758-7.366-4.154-15.104-4.154-22.993
+			c0-36.177,29.428-65.606,65.606-65.606c7.889,0,15.616,1.396,22.993,4.154c8.716,3.258,16.791,8.471,23.377,15.081L239.546,256
+			l-104.32,104.32C128.663,366.906,120.588,372.119,111.872,375.377z M313.926,488.727c-7.889,0-15.628-1.396-23.005-4.154
+			c-8.704-3.247-16.663-8.39-23.249-14.988v-53.236c0-6.423-5.213-11.636-11.636-11.636c-6.423,0-11.636,5.213-11.636,11.636v53.225
+			c-6.609,6.598-14.58,11.764-23.261,15.023c-7.412,2.746-15.162,4.131-23.028,4.131c-36.201,0-65.641-29.428-65.641-65.606
+			c0-7.889,1.396-15.616,4.154-22.982c3.258-8.716,8.46-16.78,15.046-23.354L256,272.454l104.285,104.285
+			c0.012,0.023,0.035,0.035,0.058,0.058c3.293,3.281,6.225,6.935,8.762,10.857c2.525,3.933,4.643,8.122,6.272,12.474
+			c2.758,7.377,4.154,15.104,4.154,22.993C379.532,459.299,350.103,488.727,313.926,488.727z M416.303,267.718h53.329
+			c6.575,6.575,11.706,14.522,14.941,23.215c2.758,7.366,4.154,15.104,4.154,22.993c0,36.177-29.428,65.606-65.606,65.606
+			c-7.889,0-15.616-1.396-22.982-4.154c-8.727-3.258-16.803-8.471-23.389-15.081L272.454,256l104.32-104.32
+			c6.563-6.586,14.639-11.799,23.354-15.057c7.378-2.758,15.104-4.154,22.993-4.154c36.177,0,65.606,29.44,65.606,65.641
+			c0,7.866-1.385,15.616-4.108,22.97c-3.293,8.751-8.471,16.756-15.092,23.366h-53.225c-6.423,0-11.636,5.213-11.636,11.636
+			C404.666,262.516,409.879,267.718,416.303,267.718z" />
+                        </g>
+                    </g>
+                </svg>
+                <div class="line"></div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="container">
+                <div class="logo-tag">
+                    <a class="logo" href="/">
+                        <img src="img/logo-klever.png" alt="">
+
+                    </a>
+                    <p class="tagline">
+                        Создаём <span class="accent-word">любовь</span> через
+                        цветы
+                    </p>
+                </div>
+                <div class="footer-menu">
+                    <h4>Меню</h4>
+                    <div class="items">
+                        <a href="roses.html" class="item">Розы</a>
+                        <a href="bouquet.html" class="item">Букеты</a>
+                        <a href="delivery.html" class="item">Доставка</a>
+                        <a href="reviews.html" class="item">Отзывы</a>
+                        <a href="about-us.html" class="item">О нас</a>
+                    </div>
+                </div>
+                <div class="contacts">
+                    <h4>Контакты</h4>
+                    <a class="phone" href="tel:+78005553535">
+                        <i class="uil uil-phone-alt"></i>
+                        <span>8 (800) 555-35-35</span>
+                    </a>
+                    <button class="base-button" @click="callbackOpen=true">
+                        Заказать звонок
+                    </button>
+                    <div class="social">
+                        <a href="https://vk.com/">
+                            <i class="uil uil-vk-alt"></i>
+                        </a>
+                        <a href="https://whatsapp.com/">
+                            <i class="uil uil-whatsapp"></i>
+                        </a>
+                        <a href="https://telegram.org/">
+                            <i class="uil uil-telegram-alt"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="copyright">
+                    © 2024 ООО «Клевер». Все права защищены.
+                </div>
+            </div>
+        </footer>
+
+        <script>
+            const swiper = new Swiper('.swiper', {
+                // Optional parameters
+                direction: 'horizontal',
+                loop: true,
+                effect: "fade",
+                autoplay: {
+                    delay: 3000,
+                    pauseOnMouseEnter: true,
+                },
+
+                // If we need pagination
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+
+                // Navigation arrows
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+
+                // And if we need scrollbar
+                scrollbar: {
+                    el: '.swiper-scrollbar',
+                },
+            });
+        </script>
+    </body>
+
+</html>

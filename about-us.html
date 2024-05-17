@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Great+Vibes&display=swap"
+              rel="stylesheet">
+        <link rel="stylesheet" href="css/styles.css">
+        <link rel="stylesheet"
+              href="https://unicons.iconscout.com/release/v4.0.8/css/line.css">
+        <link
+              rel="stylesheet"
+              href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+        <script
+                src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+        <script defer
+                src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        <title>О нас</title>
+        <link rel="icon" type="image/x-icon" href="/img/favicon.png">
+    </head>
+
+    <body x-data="{
+            cart: JSON.parse(localStorage.getItem('cart')||'{}'),
+            length: 0,
+            cartOpen: false,
+            sum: 0,
+            positions: 0,
+            preorderOpen: false,
+            orderOpen: false,
+            callbackOpen: false,
+            thanksOpen: false,
+            mobileOpen: false,
+        }"
+          x-effect="length = Object.keys(cart).length">
+
+        <header>
+            <div class="top-menu">
+                <a class="logo" href="/">
+                    <img src="img/logo-klever.png" alt="">
+                </a>
+                <p class="tagline">
+                    Создаём <span class="accent-word">любовь</span> через цветы
+                </p>
+                <div class="contacts">
+                    <div class="social">
+                        <a href="vk.com">
+                            <i class="uil uil-vk-alt"></i>
+                        </a>
+                        <a href="whatsapp.com">
+                            <i class="uil uil-whatsapp"></i>
+                        </a>
+                        <a href="telegram.com">
+                            <i class="uil uil-telegram-alt"></i>
+                        </a>
+                    </div>
+                    <a class="phone" href="tel:+78005553535">
+                        <i class="uil uil-phone-alt"></i>
+                        <span>8 (800) 555-35-35</span>
+                    </a>
+                    <button class="base-button" @click="callbackOpen=true">
+                        Заказать звонок
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <nav class="sticky-menu"
+             x-effect="
+                sum = 0;
+                positions = 0;
+                Object.values(cart).forEach((value) => {
+                    sum += value['cost'] * value['quant'];
+                    positions += value['quant'];
+                });">
+            <a class="mobile-menu" href="#" @click.prevent="mobileOpen=!mobileOpen">
+                <i class="uil uil-list-ul"></i>
+            </a>
+            <div class="items"
+                 :data-open="mobileOpen">
+                <a href="roses.html" class="item">Розы</a>
+                <a href="bouquet.html" class="item">Букеты</a>
+                <a href="delivery.html" class="item">Доставка</a>
+                <a href="reviews.html" class="item">Отзывы</a>
+                <a href="about-us.html" class="item">О нас</a>
+            </div>
+            <a class="cart" href="#" @click.prevent="cartOpen=true">
+                <span x-text="length!=0 ? (
+                                'Сумма: '+ new Intl.NumberFormat(
+                                'ru-RU', {
+                                    style: 'currency',
+                                    currency: 'RUB',
+                                    maximumFractionDigits: 0,
+                                }).format(sum)
+                            ) : 'Корзина пуста'">
+                </span>
+                <i class="uil uil-shopping-cart"></i>
+                <span class="quant" x-text="length" x-show="length!=0"></span>
+            </a>
+            <div class="item-list cart-list"
+                 x-cloak
+                 x-show="cartOpen"
+                 x-transition.opacity>
+                <div class="buttons" :class="length==0&&'empty'">
+                    <template x-if="length==0">
+                        <strong>Корзина пуста</strong>
+                    </template>
+                    <strong x-show="length!=0">Корзина</strong>
+                    <button class="base-button clear"
+                            x-show="length!=0"
+                            title="Очистить корзину"
+                            @click="
+                                cart = JSON.parse('{}');
+                                localStorage.setItem('cart', JSON.stringify(cart));
+                                cartOpen = false;">
+                        <i class="uil uil-trash-alt"></i>
+                    </button>
+                    <button class="base-button close"
+                            title="Закрыть"
+                            @click.prevent="cartOpen=false">
+                        <i class="uil uil-multiply"></i>
+                    </button>
+                </div>
+                <template x-for="item in cart">
+                    <div class="item">
+                        <span class="name" x-text="item['name']"></span>
+                        -
+                        <div class="cost-quant">
+                            <span x-text="item['cost']"></span>
+                            x
+                            <span x-text="item['quant']"></span>
+                        </div>
+                    </div>
+                </template>
+                <div class="bottom" x-show="length!=0">
+                    <span class="sum" x-text="'Сумма: '+ new Intl.NumberFormat(
+                        'ru-RU', {
+                            style: 'currency',
+                            currency: 'RUB',
+                            maximumFractionDigits: 0,
+                        }).format(sum)">
+                    </span>
+                    <button class="base-button"
+                            @click.prevent="cartOpen=false;preorderOpen=true">
+                        Заказать
+                    </button>
+                </div>
+            </div>
+            <div class="modal-wrap" x-cloak x-show="preorderOpen"
+                 x-transition.opacity>
+                <div class="preorder"
+                     @click.away="preorderOpen=false">
+                    <div class="buttons">
+                        <button class="base-button clear"
+                                title="Очистить корзину"
+                                @click.prevent="
+                                        cart = JSON.parse('{}');
+                                        localStorage.setItem('cart', JSON.stringify(cart));
+                                        preorderOpen = false;">
+                            <i class="uil uil-trash-alt"></i>
+                        </button>
+                        <button class="base-button close"
+                                title="Закрыть"
+                                @click.prevent="preorderOpen=false">
+                            <i class="uil uil-multiply"></i>
+                        </button>
+                    </div>
+                    <div class="item-list">
+                        <template x-for="item in cart">
+                            <div class="item">
+                                <span class="name" x-text="item['name']"></span>
+                                -
+                                <div class="cost-quant">
+                                    <span x-text="item['cost']"></span>
+                                    x
+                                    <span x-text="item['quant']"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <span class="sum" x-text="'Сумма: '+ new Intl.NumberFormat(
+                        'ru-RU', {
+                            style: 'currency',
+                            currency: 'RUB',
+                            maximumFractionDigits: 0,
+                        }).format(sum)">
+                    </span>
+                    <button class="base-button"
+                            @click.prevent="preorderOpen=false">
+                        Продолжить покупки
+                    </button>
+                    <button class="base-button"
+                            @click.prevent="
+                                preorderOpen=false;
+                                orderOpen=true;">
+                        Оформить заказ
+                    </button>
+                </div>
+            </div>
+            <div class="modal-wrap" x-cloak x-show="orderOpen"
+                 x-transition.opacity>
+                <form action="" class="order"
+                      @click.away="orderOpen=false"
+                      @submit.prevent="
+                        orderOpen=false;
+                        thanksOpen=true;
+                        cart = JSON.parse('{}');
+                        localStorage.setItem('cart', JSON.stringify(cart));">
+                    <span>Форма заказа</span>
+                    <span class="positions" x-text="
+                        'Позиций: ' + positions
+                    "></span>
+                    <span class="sum" x-text="
+                        'Сумма: '+ new Intl.NumberFormat(
+                            'ru-RU', {
+                                style: 'currency',
+                                currency: 'RUB',
+                                maximumFractionDigits: 0,
+                            }).format(sum)
+                    "></span>
+                    <input type="text" name="name" placeholder="Ваше имя"
+                           required="" pattern="^[А-Яа-яЁё ]+$">
+                    <input type="text" name="phone"
+                           placeholder="Номер телефона"
+                           required="" pattern="[0-9+]{11,12}"
+                           maxlength="12">
+                    <input class="base-button" type="submit"
+                           value="Отправить">
+                </form>
+            </div>
+            <div class="modal-wrap" x-cloak x-show="callbackOpen"
+                 x-transition.opacity>
+                <form action="" class="callback"
+                      @click.away="callbackOpen=false"
+                      @submit.prevent="
+                        callbackOpen=false;
+                        thanksOpen=true;">
+                    <span>Форма заявки</span>
+                    <p>Пожалуйста, заполните простую форму и мы свяжемся с
+                        вами
+                        в ближайшее время</p>
+                    <input type="text" name="name" placeholder="Ваше имя"
+                           required="" pattern="^[А-Яа-яЁё ]+$">
+                    <input type="text" name="phone"
+                           placeholder="Номер телефона"
+                           required="" pattern="[0-9+]{11,12}"
+                           maxlength="12">
+                    <input class="base-button" type="submit"
+                           value="Отправить">
+                </form>
+            </div>
+            <div class="modal-wrap" x-cloak x-show="thanksOpen"
+                 x-transition.opacity>
+                <div class="thanks" @click.away="thanksOpen=false">
+                    <span>Спасибо за заявку!</span>
+                    <p>Наши специалисты свяжутся с вами в течение 15 минут
+                    </p>
+                </div>
+            </div>
+        </nav>
+
+        <div class="sticky-rect page-rect"></div>
+
+        <main class="page-main">
+
+            <section class="page-text">
+                <h1>О нас</h1>
+                <div class="container">
+                    <img src="/img/about.jpg" alt="">
+                    <p><strong>ЦВЕТОЧНАЯ МАСТЕРСКАЯ FLOWER LAB &mdash;
+                            ЭТО:</strong></p>
+
+                    <ul>
+                        <li>только отборные и всегда свежие цветы;</li>
+                        <li>оригинальная подача эксклюзивных букетов;</li>
+                        <li>шляпная коробка &mdash; идеальная замена
+                            классической вазе;</li>
+                        <li>собранная вручную упаковка;</li>
+                        <li>индивидуальное брендирование флористической упаковки
+                            для частных клиентов;</li>
+                        <li>широкие возможности для корпоративных клиентов
+                            (брэндинг, система скидок).</li>
+                    </ul>
+
+                    <p><strong>НАШ ПОДХОД К РАБОТЕ</strong></p>
+
+                    <p>Задумывались ли Вы всерьез о том, умеете ли вы дарить
+                        настоящие чувства и эмоции? А насколько вы хороши в
+                        поиске форм их выражения?</p>
+                    <p>Наверняка, вам вполне по силам написать стихи или
+                        сочинить песню для любимой, а уж, тем более, подарить ей
+                        букет из её любимых цветов. И если в вопросах сочинения
+                        или выбора поэтических и музыкальных шедевров мы можем
+                        полностью положиться на ваш изысканный вкус, то себе
+                        позволим лишь приоткрыть завесу тайны над постижением
+                        магии живых цветов и красотой их внутреннего содержания.
+                    </p>
+                    <p><strong>ИСКУССТВО ФЛОРИСТИКИ</strong></p>
+
+                    <p>Флористика &mdash; это искусство цветочной композиции,
+                        которое, как и все прекрасное в нашем мире, олицетворяет
+                        собой неудержимое стремление к совершенству. Флористы и
+                        дизайнеры букетов, вдохновляемые первозданной красотой и
+                        непреодолимым очарованием живых цветов, находятся в
+                        постоянном творческом поиске новых форм и решений,
+                        способных сравниться по красоте с творениями самой
+                        природы. Оттачивая свое мастерство и создавая подлинные
+                        шедевры, цветочные кутюрье не только задают тон
+                        флористическим трендам, но и дают всем нам возможность
+                        прикоснуться к прекрасному миру искусства цветочной
+                        композиции.</p>
+                    <p><strong>НОВЫЕ ТРЕНДЫ В ЦВЕТОЧНОЙ КОМПОЗИЦИИ</strong></p>
+
+                    <p>В цветочной мастерской FlowerLab мы внимательно исследуем
+                        новые тенденции во флористике и стараемся создавать
+                        по-настоящему эксклюзивные и свежие во всех смыслах
+                        решения.</p>
+                    <p>Наши изящные букеты в шляпных коробках станут прекрасным
+                        выбором для тех, кто не привык мыслить шаблонно и,
+                        возможно, желает ярко выразить свои чувства без слов.
+                    </p>
+                    <p>Для корпоративных клиентов разработаны готовые проекты
+                        оформления важных мероприятий, официальных событий,
+                        праздников и юбилеев компании.</p>
+                    <p>Красочные цветочные композиции, собранные нашими лучшими
+                        флористами вручную &mdash;это всегда оригинальная и
+                        запоминающаяся подача такого привычного знака внимания,
+                        как живые цветы. Предлагая Вашему вниманию стильные,
+                        оригинальные и всегда свежие букеты, мы стремимся
+                        удовлетворить вкусы самых взыскательных клиентов, чтобы
+                        шарм и очарование живых цветов могли гармонично
+                        дополнить ваши лучшие чувства и самые яркие эмоции.</p>
+                    <p>В нашем магазине цветочные коробки различного размера
+                        представлены в нескольких категориях, поэтому вы всегда
+                        сможете приобрести букет именно той величины, которая
+                        вам необходима. Кроме того, вы всегда можете заказать
+                        упаковку с вашим логотипом или айдентикой, что
+                        подразумевает брендинг для корпоративных и частных
+                        клиентов. Нужная вам упаковка также может быть сделана
+                        по индивидуальному эскизу, предложенному вами.</p>
+
+                </div>
+            </section>
+
+            <div class="separator">
+                <div class="line"></div>
+                <svg version="1.1" id="Layer_1"
+                     xmlns="http://www.w3.org/2000/svg"
+                     xmlns:xlink="http://www.w3.org/1999/xlink"
+                     viewBox="0 0 512 512" xml:space="preserve">
+                    <g>
+                        <g>
+                            <path d="M490.519,256.023c6.807-7.913,12.218-17.001,15.907-26.81c3.7-10.007,5.574-20.468,5.574-31.104
+			c0-49.024-39.866-88.913-88.879-88.913c-7.971,0-15.837,1.059-23.471,3.153c2.095-7.633,3.153-15.488,3.153-23.471
+			C402.804,39.866,362.915,0,313.891,0c-10.624,0-21.097,1.873-31.162,5.597c-9.763,3.665-18.839,9.076-26.752,15.884
+			c-7.901-6.819-16.989-12.207-26.764-15.86C219.229,1.897,208.756,0,198.074,0c-49.012,0-88.879,39.866-88.879,88.879
+			c0,7.983,1.059,15.837,3.154,23.471c-7.633-2.095-15.5-3.154-23.471-3.154C39.866,109.196,0,149.062,0,198.074
+			c0,10.682,1.897,21.155,5.62,31.127c3.654,9.786,9.053,18.874,15.86,26.775c-6.807,7.913-12.218,17.001-15.907,26.81
+			C1.873,292.794,0,303.255,0,313.891c0,49.024,39.866,88.913,88.879,88.913c7.971,0,15.837-1.059,23.471-3.153
+			c-2.095,7.633-3.154,15.488-3.154,23.471c0,49.012,39.889,88.879,88.913,88.879c10.624,0,21.097-1.873,31.162-5.597
+			c9.763-3.665,18.839-9.076,26.752-15.884c7.901,6.819,16.989,12.206,26.764,15.86c9.984,3.724,20.457,5.62,31.139,5.62
+			c49.012,0,88.879-39.866,88.879-88.879c0-7.982-1.059-15.837-3.153-23.471c7.633,2.095,15.5,3.153,23.471,3.153
+			c49.012,0,88.879-39.866,88.879-88.879c0-10.682-1.897-21.155-5.62-31.127C502.737,273.012,497.327,263.924,490.519,256.023z
+			 M198.074,23.273c7.889,0,15.628,1.396,23.005,4.154c8.739,3.258,16.721,8.425,23.319,15.046v53.341
+			c0,6.423,5.213,11.636,11.636,11.636c6.423,0,11.636-5.213,11.636-11.636V42.368c6.598-6.575,14.545-11.718,23.191-14.964
+			c7.412-2.746,15.162-4.131,23.028-4.131c36.201,0,65.641,29.428,65.641,65.606c0,7.889-1.396,15.616-4.154,22.982
+			c-3.258,8.716-8.46,16.78-15.046,23.354c-0.012,0.012-0.023,0.023-0.035,0.035L256,239.546l-104.32-104.32
+			c-6.586-6.563-11.799-14.639-15.057-23.354c-2.758-7.377-4.154-15.104-4.154-22.993C132.468,52.701,161.897,23.273,198.074,23.273
+			z M111.872,375.377c-7.377,2.758-15.104,4.154-22.993,4.154c-36.177,0-65.606-29.44-65.606-65.641
+			c0-7.866,1.385-15.616,4.108-22.97c3.258-8.669,8.39-16.617,14.929-23.203h53.457c6.423,0,11.636-5.201,11.636-11.636
+			c0-6.423-5.213-11.636-11.636-11.636H42.531c-6.656-6.598-11.834-14.604-15.104-23.377c-2.758-7.366-4.154-15.104-4.154-22.993
+			c0-36.177,29.428-65.606,65.606-65.606c7.889,0,15.616,1.396,22.993,4.154c8.716,3.258,16.791,8.471,23.377,15.081L239.546,256
+			l-104.32,104.32C128.663,366.906,120.588,372.119,111.872,375.377z M313.926,488.727c-7.889,0-15.628-1.396-23.005-4.154
+			c-8.704-3.247-16.663-8.39-23.249-14.988v-53.236c0-6.423-5.213-11.636-11.636-11.636c-6.423,0-11.636,5.213-11.636,11.636v53.225
+			c-6.609,6.598-14.58,11.764-23.261,15.023c-7.412,2.746-15.162,4.131-23.028,4.131c-36.201,0-65.641-29.428-65.641-65.606
+			c0-7.889,1.396-15.616,4.154-22.982c3.258-8.716,8.46-16.78,15.046-23.354L256,272.454l104.285,104.285
+			c0.012,0.023,0.035,0.035,0.058,0.058c3.293,3.281,6.225,6.935,8.762,10.857c2.525,3.933,4.643,8.122,6.272,12.474
+			c2.758,7.377,4.154,15.104,4.154,22.993C379.532,459.299,350.103,488.727,313.926,488.727z M416.303,267.718h53.329
+			c6.575,6.575,11.706,14.522,14.941,23.215c2.758,7.366,4.154,15.104,4.154,22.993c0,36.177-29.428,65.606-65.606,65.606
+			c-7.889,0-15.616-1.396-22.982-4.154c-8.727-3.258-16.803-8.471-23.389-15.081L272.454,256l104.32-104.32
+			c6.563-6.586,14.639-11.799,23.354-15.057c7.378-2.758,15.104-4.154,22.993-4.154c36.177,0,65.606,29.44,65.606,65.641
+			c0,7.866-1.385,15.616-4.108,22.97c-3.293,8.751-8.471,16.756-15.092,23.366h-53.225c-6.423,0-11.636,5.213-11.636,11.636
+			C404.666,262.516,409.879,267.718,416.303,267.718z" />
+                        </g>
+                    </g>
+                </svg>
+                <div class="line"></div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="container">
+                <div class="logo-tag">
+                    <a class="logo" href="/">
+                        <img src="img/logo-klever.png" alt="">
+
+                    </a>
+                    <p class="tagline">
+                        Создаём <span class="accent-word">любовь</span> через
+                        цветы
+                    </p>
+                </div>
+                <div class="footer-menu">
+                    <h4>Меню</h4>
+                    <div class="items">
+                        <a href="roses.html" class="item">Розы</a>
+                        <a href="bouquet.html" class="item">Букеты</a>
+                        <a href="delivery.html" class="item">Доставка</a>
+                        <a href="reviews.html" class="item">Отзывы</a>
+
+                        <a href="about-us.html" class="item">О нас</a>
+                    </div>
+                </div>
+                <div class="contacts">
+                    <h4>Контакты</h4>
+                    <a class="phone" href="tel:+78005553535">
+                        <i class="uil uil-phone-alt"></i>
+                        <span>8 (800) 555-35-35</span>
+                    </a>
+                    <button class="base-button" @click="callbackOpen=true">
+                        Заказать звонок
+                    </button>
+                    <div class="social">
+                        <a href="https://vk.com/">
+                            <i class="uil uil-vk-alt"></i>
+                        </a>
+                        <a href="https://whatsapp.com/">
+                            <i class="uil uil-whatsapp"></i>
+                        </a>
+                        <a href="https://telegram.org/">
+                            <i class="uil uil-telegram-alt"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="copyright">
+                    © 2024 ООО «Клевер». Все права защищены.
+                </div>
+            </div>
+        </footer>
+
+        <script>
+
+        </script>
+    </body>
+
+</html>
