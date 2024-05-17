@@ -483,7 +483,8 @@ section {
   width: 0.75rem;
 }
 .hero .swiper-slide .background {
-  height: 40rem;
+  height: 70vh;
+  max-height: 40rem;
 }
 .hero .swiper-slide img {
   height: 100%;
@@ -1020,7 +1021,7 @@ footer .copyright {
     border-radius: 1rem;
   }
   .hero .swiper-slide .background {
-    height: 30rem;
+    max-height: 30rem;
   }
   .hero .swiper-slide .foreground {
     min-width: auto;

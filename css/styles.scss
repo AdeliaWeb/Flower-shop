@@ -545,7 +545,8 @@ section {
 
         &-slide {
             .background {
-                height: 40rem;
+                height: 70vh;
+                max-height: 40rem;
             }
 
             img {
@@ -1196,7 +1197,7 @@ footer {
         }
         .swiper-slide {
             .background {
-                height: 30rem;
+                max-height: 30rem;
             }
 
             .foreground {
